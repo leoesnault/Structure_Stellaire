@@ -30,3 +30,6 @@
 
 # Unsaved files
 *.cpp~
+
+# References
+/ref/*
