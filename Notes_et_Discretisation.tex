@@ -9,32 +9,29 @@
 \maketitle
 \tableofcontents
 
-\section*{Notes :}
+\section*{Notes}
 Bouquin structure stellaire (Kippenhahn) :\\
 \url{http://bookzz.org/book/2292709/51adf0}\\
 Voire Chapitres I.1, I.2 ; II.10, II.11, II.12 ; IV.19, IV.21\\
 \\
 On s'intéresse à la structure mécanique d'étoiles pouvant être décrites par une équation d'état polytropique, soit les étoiles avec un gaz d'électrons dégénérés (type naine blanche, K fixé, n=3/2 si non relativiste, n=3 si relativiste), ou décrits par un gaz parfait + condition adiabatique (étoiles convectives très massives, K paramètre libre).\\
-
+Un exemple de résolution des équations de Lane-Endem pour les naines blanches est donné ici : \url{http://userpages.irap.omp.eu/~rbelmont/mypage/numerique/naines_blanches.pdf}
 
 \newpage
-\section{Hypothèses :}
-- Équilibre hydrostatique\\
-- Chimiquement homogène \\
-- Sans rotation propre \\
-- Équation d'état polytropique $ P = K \rho^{1+\frac{1}{n}} $ \\
-- Traitement Lagrangien (variable indépendante : m)\\
-- Calcul à une dimension
+\section{Hypothèses}
+\begin{list}{•}{}
+\item Équilibre hydrostatique
+\item Chimiquement homogène
+\item Sans rotation propre
+\item Équation d'état polytropique $ P = K \rho^{(1+\frac{1}{n})} $
+\item Traitement Lagrangien (variable indépendante : m)
+\item Calcul à une dimension
+\end{list}
 
-\section{Équations de structure stellaire :}
+\section{Équations de structure stellaire}
 Kippenhahn Ch.10, p89
-\subsection{Structure mécanique :}
-%Équation d'état :
-%\begin{equation}
-%P=K \rho^\gamma
-%\end{equation}
-%\\
-Équation du rayon :
+\subsection{Structure mécanique}
+Équation de conservation de la masse :
 \begin{equation}
 \frac{d r}{d m} = \frac{1}{4 \pi r^2 \rho}
 \end{equation}
@@ -43,7 +40,7 @@ Kippenhahn Ch.10, p89
 \begin{equation}
 \frac{d P}{d m} = - \frac{G m}{4 \pi r^4}
 \end{equation}
-\subsection{Structure thermique et énergétique :}
+\subsection{Structure thermique et énergétique}
 \textbf{Équations découplées de la structure mécanique dans le cas d'une équation d'état polytropique. Ces équations ne sont donc pas considérées dans un premier temps.}\\
 Équation de conservation de l'énergie :
 \begin{equation}
@@ -55,33 +52,40 @@ Kippenhahn Ch.10, p89
 \frac{d T}{d m}= - \frac{G m}{4 \pi r^4} \frac{T}{P} \bigtriangledown ~ avec ~ \bigtriangledown = \frac{d~ln T}{d~ln P}
 \end{equation}
 
-\section{Dédimensionnement des équations :}
-Kippenhahn Ch.20, p234\\
-On pose $q=\frac{m}{M}$ la masse adimensionnée.\\
-
 \newpage
-\section{Conditions aux limites :}
+
+\section{Dédimensionnement des équations}
+Kippenhahn Ch.20, p234 ou Ch.2 p 12\\
+On adimensionne les variables par rapport aux constantes caractéristiques suivantes :\\
+Le rayon de l'étoile $R$ , la pression centrale $P_c \approx \frac{2 G M^2}{\pi R^4}$ (estimation), la densité centrale $\rho_c =(\frac{P_c}{K})^{\frac{n}{n+1}}$, et la masse totale $M$. \\
+On pose $\tilde{m}=\frac{m}{M}$ la masse adimensionnée, $\tilde{r}=\frac{r}{R}$ le rayon adimensionné, $\tilde{P}=\frac{P}{P_c}$ la pression adimensionnée et $\tilde{\rho}=\frac{\rho}{\rho_c}$ la densité adimensionnée. \\
+\\
+On obtient alors facilement les équations suivantes :
+\begin{eqnarray}
+\frac{d \tilde{r}}{d \tilde{m}}=\frac{1}{4 \pi \tilde{r}^2 \tilde{\rho}} \frac{M}{R^3 \rho_c} =\frac{1}{4 \pi \tilde{r}^2 \tilde{\rho}} A\\
+\frac{d \tilde{P}}{d \tilde{m}}=-\frac{G}{4 \pi \tilde{r}^4} \frac{M}{R^4 P_c} =-\frac{G}{4 \pi \tilde{r}^4} B
+\end{eqnarray}
+
+
+\section{Conditions aux limites}
 Kippenhahn Ch.11, p93
 \paragraph{Au centre}: \\
 %Flux d'énergie $l(m=0)=0$\\
 Rayon $r(m=0)=0$\\
-\\
-Variation de pression $\frac{\partial P}{\partial m}\vert_{m=0} = 0$\\
-Variation de densité $\frac{\partial \rho}{\partial m}\vert_{m=0} = 0$\\
+Variation de pression $\frac{\partial P}{\partial m}\vert_{m=0} = 0$
 %Variation de température $\frac{\partial T}{\partial m}\vert_{m=0} = 0$\\
 
-\paragraph{En surface}:\\
-Pression $P(m=M)=0$\\
-Densité $\rho(m=M)=0$\\
+\paragraph{En surface}: \\
+Pression $P(m=M)=0$
 %Température $T(m=M)=0$\\
 
-\section{Passage en variables de Milne :}
+\section{Passage en variables de Milne}
 Kippenhahn Ch.21, p243\\
 $U=\frac{d~ln m}{d~ln r} $ et $V=-\frac{d~ln P}{d~lnr}$\\
 Au centre, $U \rightarrow 3$ et $V \rightarrow 0$ .\\
 En surface, $U$ devient très faible et $V$ augmente beaucoup.
 
-\section{Discrétisation :}
+\section{Discrétisation}
 %On peut considérer une discrétisation sur N points, de $m=0$ à $M$.\\
 %On aura $m=i*h$ avec $i=0 \dots N$, et $h=\frac{M}{N}$ le pas de masse.
 %\subsection{Équation de r :}
@@ -98,6 +102,37 @@ En surface, $U$ devient très faible et $V$ augmente beaucoup.
 %\frac{d P}{d m} = - \frac{G m}{4 \pi r^4}
 %\end{equation}
 
+
+\section{Méthode de relaxation}
+
+
+
+\section{Validation par comparaison à une méthode de référence}
+Kippenhahn Ch.19 p216.\\
+Il existe des solutions analytiques aux équations de structure stellaire de Lane-Endem pour les polytropes n=0, n=1 et n=5.\\
+On compare les solutions trouvées avec ces solutions analytiques pour valider le modèle numérique.\\
+Ces solutions sont données dans le tableau ci dessous :\\
+\begin{tabular}{cc}
+\hline 
+\\
+n & w(z)\\
+\\
+\hline 
+\\
+n=0 & $1 - \frac{1}{6} z^2$\\
+\\
+\hline 
+\\
+n=1 & $\frac{\sin(z)}{z}$\\
+\\
+\hline 
+\\
+n=5 & $\frac{1}{(1+\frac{z^2}{3})^{\frac{1}{2}}}$\\
+\\
+\hline 
+\end{tabular}
+
+\section{Utilisation du programme}
 
 
 
