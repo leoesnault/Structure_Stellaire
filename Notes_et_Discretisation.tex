@@ -24,7 +24,7 @@ Un exemple de résolution des équations de Lane-Endem pour les naines blanches 
 \item Chimiquement homogène
 \item Sans rotation propre
 \item Équation d'état polytropique $ P = K \rho^{(1+\frac{1}{n})} $
-\item Traitement Lagrangien (variable indépendante : m)
+\item Traitement Eulerien (variable indépendante : r)
 \item Calcul à une dimension
 \end{list}
 
@@ -33,12 +33,12 @@ Kippenhahn Ch.10, p89
 \subsection{Structure mécanique}
 Équation de conservation de la masse :
 \begin{equation}
-\frac{d r}{d m} = \frac{1}{4 \pi r^2 \rho}
+\frac{d m}{d r} = 4 \pi r^2 \rho
 \end{equation}
 \\
 Équation d'équilibre hydrostatique : 
 \begin{equation}
-\frac{d P}{d m} = - \frac{G m}{4 \pi r^4}
+\frac{d P}{d r} = - \frac{G m \rho}{r^2}
 \end{equation}
 \subsection{Structure thermique et énergétique}
 \textbf{Équations découplées de la structure mécanique dans le cas d'une équation d'état polytropique. Ces équations ne sont donc pas considérées dans un premier temps.}\\
@@ -56,28 +56,33 @@ Kippenhahn Ch.10, p89
 
 \section{Dédimensionnement des équations}
 Kippenhahn Ch.20, p234 ou Ch.2 p 12\\
-On adimensionne les variables par rapport aux constantes caractéristiques suivantes :\\
-Le rayon de l'étoile $R$ , la pression centrale $P_c \approx \frac{2 G M^2}{\pi R^4}$ (estimation), la densité centrale $\rho_c =(\frac{P_c}{K})^{\frac{n}{n+1}}$, et la masse totale $M$. \\
-On pose $\tilde{m}=\frac{m}{M}$ la masse adimensionnée, $\tilde{r}=\frac{r}{R}$ le rayon adimensionné, $\tilde{P}=\frac{P}{P_c}$ la pression adimensionnée et $\tilde{\rho}=\frac{\rho}{\rho_c}$ la densité adimensionnée. \\
+%On adimensionne les variables par rapport aux constantes caractéristiques suivantes :\\
+%Le rayon de l'étoile $R$ , la pression centrale $P_c \approx \frac{2 G M^2}{\pi R^4}$ (estimation), la densité centrale $\rho_c =(\frac{P_c}{K})^{\frac{n}{n+1}}$, et la masse totale $M$. \\
+On pose $q=\frac{m}{M}$ la masse adimensionnée, $z=A r$ le rayon adimensionné, et $w=(\frac{\rho}{\rho_c})^{\frac{1}{n}}$ la densité adimensionnée ; avec $A=...$ \\
 \\
-On obtient alors facilement les équations suivantes :
+En utilisant l'équation d'équilibre hydrostatique et l'équation de Poisson du potentiel gravitationnel, ainsi que l'équation d'état polytropique, on arrive à l'équation de Lane-Emden :\\
 \begin{eqnarray}
-\frac{d \tilde{r}}{d \tilde{m}}=\frac{1}{4 \pi \tilde{r}^2 \tilde{\rho}} \frac{M}{R^3 \rho_c} =\frac{1}{4 \pi \tilde{r}^2 \tilde{\rho}} A\\
-\frac{d \tilde{P}}{d \tilde{m}}=-\frac{G}{4 \pi \tilde{r}^4} \frac{M}{R^4 P_c} =-\frac{G}{4 \pi \tilde{r}^4} B
+\frac{1}{z^2}\frac{d}{dz}(z^2 \frac{d w}{dz}) + w^n=0\\
+m(r)=4 \pi r^3 \rho_c \left(- \frac{1}{z} \frac{dw}{dz}\right)
 \end{eqnarray}
-
 
 \section{Conditions aux limites}
 Kippenhahn Ch.11, p93
 \paragraph{Au centre}: \\
 %Flux d'énergie $l(m=0)=0$\\
-Rayon $r(m=0)=0$\\
-Variation de pression $\frac{\partial P}{\partial m}\vert_{m=0} = 0$
+Rayon $r(m=0)=0$ : \\
+Variation de pression $\frac{\partial P}{\partial m}\vert_{m=0} = 0$\\
+Ce qui implique :\\
+$z=0$ :\\
+$\frac{dw}{dz}=0$\\
+$w=1$
 %Variation de température $\frac{\partial T}{\partial m}\vert_{m=0} = 0$\\
 
 \paragraph{En surface}: \\
-Pression $P(m=M)=0$
+Pression $P(m=M)=0$\\
+
 %Température $T(m=M)=0$\\
+$w=0$
 
 \section{Passage en variables de Milne}
 Kippenhahn Ch.21, p243\\
