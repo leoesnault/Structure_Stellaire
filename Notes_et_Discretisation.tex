@@ -15,9 +15,13 @@ Bouquin structure stellaire (Kippenhahn) :\\
 Voire Chapitres I.1, I.2 ; II.10, II.11, II.12 ; IV.19, IV.21\\
 \\
 On s'intéresse à la structure mécanique d'étoiles pouvant être décrites par une équation d'état polytropique, soit les étoiles avec un gaz d'électrons dégénérés (type naine blanche, K fixé, n=3/2 si non relativiste, n=3 si relativiste), ou décrits par un gaz parfait + condition adiabatique (étoiles convectives très massives, K paramètre libre).\\
-Un exemple de résolution des équations de Lane-Endem pour les naines blanches est donné ici : \url{http://userpages.irap.omp.eu/~rbelmont/mypage/numerique/naines_blanches.pdf}
-
 \newpage
+Un exemple de résolution des équations de Lane-Endem pour les naines blanches est donné ici : \url{http://userpages.irap.omp.eu/~rbelmont/mypage/numerique/naines_blanches.pdf}\\
+\url	{jila.colorado.edu/~pja/stars02/lecture12.ps}\\
+\url{http://www.rfrench.org/astro/papers/P110-HET611-RobertFrench.pdf}\\
+\url{http://www.unige.ch/ses/dsec/static/gilli/Teaching/MNE-Cours.pdf} Méthode de relaxation \\
+
+
 \section{Hypothèses}
 \begin{list}{•}{}
 \item Équilibre hydrostatique
@@ -36,7 +40,7 @@ Kippenhahn Ch.10, p89
 \frac{d m}{d r} = 4 \pi r^2 \rho
 \end{equation}
 \\
-Équation d'équilibre hydrostatique : 
+Équation d'équilibre hydrostatique :
 \begin{equation}
 \frac{d P}{d r} = - \frac{G m \rho}{r^2}
 \end{equation}
@@ -58,7 +62,7 @@ Kippenhahn Ch.10, p89
 Kippenhahn Ch.20, p234 ou Ch.2 p 12\\
 %On adimensionne les variables par rapport aux constantes caractéristiques suivantes :\\
 %Le rayon de l'étoile $R$ , la pression centrale $P_c \approx \frac{2 G M^2}{\pi R^4}$ (estimation), la densité centrale $\rho_c =(\frac{P_c}{K})^{\frac{n}{n+1}}$, et la masse totale $M$. \\
-On pose $q=\frac{m}{M}$ la masse adimensionnée, $z=A r$ le rayon adimensionné, et $w=(\frac{\rho}{\rho_c})^{\frac{1}{n}}$ la densité adimensionnée ; avec $A=...$ \\
+On pose $q=\frac{m}{M}$ la masse adimensionnée, $z=A r$ le rayon adimensionné, et $w=(\frac{\rho}{\rho_c})^{\frac{1}{n}}$ la densité adimensionnée ; avec $A=\sqrt{\frac{4 \pi G}{(n+1) K \rho_c^{\frac{1-n}{n}}}}$ \\
 \\
 En utilisant l'équation d'équilibre hydrostatique et l'équation de Poisson du potentiel gravitationnel, ainsi que l'équation d'état polytropique, on arrive à l'équation de Lane-Emden :\\
 \begin{eqnarray}
@@ -118,23 +122,23 @@ Il existe des solutions analytiques aux équations de structure stellaire de Lan
 On compare les solutions trouvées avec ces solutions analytiques pour valider le modèle numérique.\\
 Ces solutions sont données dans le tableau ci dessous :\\
 \begin{tabular}{cc}
-\hline 
+\hline
 \\
 n & w(z)\\
 \\
-\hline 
+\hline
 \\
 n=0 & $1 - \frac{1}{6} z^2$\\
 \\
-\hline 
+\hline
 \\
 n=1 & $\frac{\sin(z)}{z}$\\
 \\
-\hline 
+\hline
 \\
 n=5 & $\frac{1}{(1+\frac{z^2}{3})^{\frac{1}{2}}}$\\
 \\
-\hline 
+\hline
 \end{tabular}
 
 \section{Utilisation du programme}
