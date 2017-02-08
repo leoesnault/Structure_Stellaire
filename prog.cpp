@@ -6,6 +6,14 @@ Programme de calcul de structure stellaire, utilisant les hypothèses :
 -Équation d'état polytropique
 -Solutions à une dimension
 -
+
+A faire :
+-Trouver une valeur raisonnable de K. plus vers 1e7 ou 1e16 ou 1 ?
+-Variables de Milne ?
+-Conditions au centre et en surface ?
+-Modifier l'algo de résolution de w. Comment faire pour résoudre un syst non linéaire ?
+-Résolution q. Couplé avec w ?
+-
 */
 
 
@@ -22,9 +30,8 @@ const double 	G=6.6741e-11,
 				pi=3.1415; // constantes physiques et mathématiques
 double 			M=1.9891e30,
 				R=6.9634e8,
-				n=3.,
+				n=0.,
 				K=1e7;//e16; // Masse totale, rayon, indice polytropique et constante polytropique(a trouver)
-//float u=(d ln(M))/(d ln(r)),v=-(d ln(P))/(d ln(r)); // variables de Milne
 // ----
 
 
@@ -46,16 +53,20 @@ float 			critere_convergence=0.01;
 
 
 // Définition des fonctions
-void calcul_z(int i)
+void calcul_z()
 {
-	z[i]=i*h_z;
+	for (int i = 0; i <= N; i++)
+	{
+		z[i]=i*h_z;
+	}
 }
 
-void calcul_w(int i)
+
+void calcul_w() // A MODIF !!
 {
 	int convergence_sur_tout_z;
 
-	cout << "convergence_sur_tout_z" << endl;
+	// cout << "convergence_sur_tout_z" << endl;
 		double sum=0.;
 		for (int i = 0; i <= N; i++)
 		{
@@ -101,33 +112,40 @@ void calcul_w(int i)
 }
 
 
-void calcul_w_exact(int i)
+void calcul_w_exact()
 {
 	if (n==0)
 	{
-		w_exact[i] = 1.-pow(z[i],2)/6.;
+		for (int i = 0; i <= N; i++)
+		{
+			w_exact[i] = 1.-pow(z[i],2)/6.;
+		}
 	}
 	if (n==1)
 	{
-		if (z[i]==0.)
-		{
-			w_exact[i]=1.;
-		}
-		else
+		z[0]=1.;
+		for (int i = 1; i <= N; i++)
 		{
 			w_exact[i] = sin(z[i])/z[i];
 		}
 	}
 	if (n==5)
 	{
-		w_exact[i] = 1./sqrt(1.+pow(z[i],2)/3.);
+		for (int i = 0; i <= N; i++)
+		{
+			w_exact[i] = 1./sqrt(1.+pow(z[i],2)/3.);
+		}
 	}
 }
 
 
-void calcul_q(int i)
+void calcul_q() // A MODIF ?
 {
-	q[i]=-4.*pi*rho_c*(pow(z[i]/A,2)/A);// *(dw/dz)
+	q[0]=0.;
+	for (int i = 1; i <= N; i++)
+	{
+		q[i]=-4.*pi*rho_c*(pow(z[i]/A,2)/A)*((w[i-1]-w[i])/h_z)*(1./M);// Schéma à gauche
+	}
 }
 // ----
 
@@ -140,7 +158,7 @@ int main()
 	// ----
 
 
-	// Définition du fichier de sortie
+	// Définition des fichiers de sortie et de la précision
 	ofstream results("results.dat");
 	ofstream results_physics_variables("results_physics_variables.dat");
 
@@ -151,14 +169,10 @@ int main()
 	// ----
 
 
-	// Définition des conditions au centre et remplissage des vecteurs a, b, c
-	q[0]=0.;
-	z[0]=0.;
-	w[0]=1.;
-
+	// Remplissage des vecteurs a, b, c. A REVOIR (Conditions au centre et au bord)
 	a[0]=0.;//normalement inutile
 	b[0]=1.;
-	c[0]=-1.;
+	c[0]=0.;
 
 	a[N]=0.;
 	b[N]=1.;
@@ -172,20 +186,20 @@ int main()
 
 	for (int i = 0; i <= N; i++)
 	{
-		B[i]=0.; // A modif, second menbre
+		B[i]=0.; // A modif, second membre
 	}
 	// ----
 
 
 	// Résolution
-	for (unsigned int i = 0; i <= N; i += 1) // Besoin de boucler ? Ici boucle sur les pas d'espace
+	if(n!=0 and n!=1 and n!=5)
 	{
-		if(n!=0 and n!=1 and n!=5)
-		{
-			calcul_z(i);
-			calcul_w(i);
-			calcul_q(i);
+		calcul_z();
+		calcul_w();
+		calcul_q();
 
+		for (unsigned int i = 0; i <= N; i += 1)
+		{
 			results
 			<< z[i] << "		"
 			<< w[i] << "		"
@@ -197,13 +211,16 @@ int main()
 			<< K*pow(pow(w[i],n)*rho_c,float(n+1)/float(n)) << "		"
 			<< q[i]*M << endl;
 		}
-		else
-		{
-			calcul_z(i);
-			calcul_w(i);
-			calcul_w_exact(i);
-			calcul_q(i);
+	}
+	else
+	{
+		calcul_z();
+		calcul_w();
+		calcul_w_exact();
+		calcul_q();
 
+		for (unsigned int i = 0; i <= N; i += 1)
+		{
 			results
 			<< z[i] << "		"
 			<< w[i] << "		"

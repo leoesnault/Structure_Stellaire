@@ -4,15 +4,15 @@ import numpy as np
 results=np.loadtxt("results.dat")
 
 if len(results[0])==3:
-    z,q,w_calc=results.T
+    z,w_calc,q=results.T
     plt.axes(xlabel='z')
-    plt.plot(z,q,'ob',z,w_calc,'or')
-    plt.legend(('q','w_calc'))
+    plt.plot(z,w_calc,'.r',z,q,'.b')
+    plt.legend(('w_calc','q'))
 else:
-    z,q,w_calc,w_exact=results.T
+    z,w_calc,w_exact,q=results.T
     plt.axes(xlabel='z')
-    plt.plot(z,q,'ob',z,w_calc,'or',z,w_exact,'r')
-    plt.legend(('q','w_calc','w_exact'))
+    plt.plot(z,w_calc,'.r',z,w_exact,'r',z,q,'.b')
+    plt.legend(('w_calc','w_exact','q'))
 
 
 plt.show()
