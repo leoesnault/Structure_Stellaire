@@ -9,11 +9,10 @@ Programme de calcul de structure stellaire, utilisant les hypothèses :
 
 A faire :
 -Trouver une valeur raisonnable de K. plus vers 1e7 ou 1e16 ou 1 ?
--Variables de Milne ?
--Conditions au centre et en surface ?
+-Quelles données à entrer dans le programme ?
+-Conditions en surface ?
 -Modifier l'algo de résolution de w. Comment faire pour résoudre un syst non linéaire ?
--Résolution q. Couplé avec w ?
--
+- !!!! problème en z=1 !!!!
 */
 
 
@@ -30,8 +29,8 @@ const double 	G=6.6741e-11,
 				pi=3.1415; // constantes physiques et mathématiques
 double 			M=1.9891e30,
 				R=6.9634e8,
-				n=0.,
-				K=1e7;//e16; // Masse totale, rayon, indice polytropique et constante polytropique(a trouver)
+				n=1.,
+				K=5e7;//e16; // Masse totale, rayon, indice polytropique et constante polytropique(a trouver)
 // ----
 
 
@@ -40,75 +39,96 @@ double 			P_c=(2.*G/pi*pow(R,4)),
 				rho_c=pow((P_c/K),n/(n+1)); // estimation pression et densité au centre
 double 			A=sqrt(4.*pi*G/(float(n+1)*K*pow(rho_c,(1-n)/n)));
 
-const int 		N=2000; // nombre de noeuds de la grille de calcul
+const int 		N=100; // nombre de noeuds de la grille de calcul
 const double 	h_r=R/N,h_z=A*h_r; // pas en r et z
 
 double 			q[N+1],z[N+1],w[N+1];
 double 			w_exact[N+1],w_GS[N+1],w_prec[N+1];
 
-float 			omega=1.;
-double 			a[N+1],b[N+1],c[N+1],B[N+1];
-float 			critere_convergence=0.01;
+// float 			omega=1.;
+// double 			a[N+1],b[N+1],c[N+1],B[N+1];
+float 			critere_convergence=0.001;
 // ----
 
 
 // Définition des fonctions
-void calcul_z()
+void initialisation_w()
 {
-	for (int i = 0; i <= N; i++)
+	// cout << "Initialisation : "<< endl;
+	for (int i = 0; i <= N; i++) // initialisation w quadratique
 	{
-		z[i]=i*h_z;
+		w[i]=1.-(1./2.)*pow(i*h_z,1);
+		// cout << w[i] << endl;
 	}
 }
 
 
-void calcul_w() // A MODIF !!
-{
-	int convergence_sur_tout_z;
+// bool test_derivee_centrale_w()
+// {
+// 	if (-3.*w[1]+4.*w[2]-w[3]<critere_convergence)
+// 	{
+// 		return true;
+// 	}
+// 	else
+// 	{
+// 		return false;
+// 	}
+// }
 
-	// cout << "convergence_sur_tout_z" << endl;
-		double sum=0.;
+
+// bool test_convergence_w(int i)
+// {
+// 	float terme_de_gauche=pow(h_z,2)*pow(w[i],n)-2.*w[i];
+// 	float terme_de_droite=w[i+1]*((h_z/z[i])+1.) + w[i-1]*((h_z/z[i])-1.);
+// 	
+// 	if ( abs(terme_de_gauche-terme_de_droite)<critere_convergence )
+// 	{
+// 		return true;
+// 	}
+// 	else
+// 	{
+// 		return false;
+// 	}
+// }
+
+
+void calcul_w()
+{
+	w[0]=1.;
+	
+	bool convergence=false;
+	
+	while (convergence==false)
+	{
 		for (int i = 0; i <= N; i++)
 		{
-			w_GS[i]=0.;
+			w_prec[i]=w[i];
 		}
-		do // !!!!!! Diverge si w_GS(0)!=0 !!!!
+		
+		convergence=true;
+		
+		for (int i = 1; i <= N; i++)
 		{
-			convergence_sur_tout_z=0;
-
-			for (unsigned int i = 0; i <= N; i += 1)
+			// "Forcage" de la dérivée nulle au centre
+			// w[1]=(1./4.)*(3.*w[0]-w[2]);
+			// ----
+			
+			/* Calcul de w[i] pour n=1 !! */
+			w[i]=(1./(pow(h_z,2)-2.))*(w[i+1]*((h_z/z[i])-1.) + w[i-1]*(-(h_z/z[i])-1.));
+			// w[i]=abs(w[i]);
+			// cout<<w[i]<<endl;
+			
+			if (abs(w_prec[i]-w[i])<critere_convergence) // A simplifier ?
 			{
-				w_prec[i]=w_GS[i];
-
-				sum = sum + a[i]*w_GS[i] + c[i]*w_GS[i];
-
-				w_GS[i]=(B[i]-sum)/b[i];
-				// cout << w_prec[i] << "    " << w_GS[i]-w_prec[i] << "    " << convergence_sur_tout_z << endl ;
-
-				if (abs(w_GS[i]-w_prec[i])<critere_convergence)
-				{
-					convergence_sur_tout_z ++;
-					// cout << w_prec[i] << "    " << w_GS[i]-w_prec[i] << "    " << convergence_sur_tout_z << endl ;
-				}
+				convergence=convergence && true;
 			}
-
-		} while (convergence_sur_tout_z<N);
-
-
-
-		do
-		{
-			convergence_sur_tout_z=0;
-			for (unsigned int i = 1; i <= N; i += 1)
+			else
 			{
-				w[i]=omega*w_GS[i]+(1.-omega)*w[i];
-
-				if (abs(w_GS[i]-w_prec[i])<critere_convergence)
-				{
-					convergence_sur_tout_z ++;
-				}
+				convergence=convergence && false;
 			}
-		} while(convergence_sur_tout_z<N);
+		}
+		// getchar();
+	}
 }
 
 
@@ -139,12 +159,21 @@ void calcul_w_exact()
 }
 
 
-void calcul_q() // A MODIF ?
+void calcul_z()
+{
+	for (int i = 0; i <= N; i++)
+	{
+		z[i]=i*h_z;
+	}
+}
+
+
+void calcul_q() // A MODIF ? Décentré ordre 2 ?
 {
 	q[0]=0.;
 	for (int i = 1; i <= N; i++)
 	{
-		q[i]=-4.*pi*rho_c*(pow(z[i]/A,2)/A)*((w[i-1]-w[i])/h_z)*(1./M);// Schéma à gauche
+		q[i]=-4.*pi*rho_c*(pow(z[i]/A,2)/A)*((w[i]-w[i-1])/h_z)*(1./M);// Schéma à gauche
 	}
 }
 // ----
@@ -159,18 +188,20 @@ int main()
 
 
 	// Définition des fichiers de sortie et de la précision
-	ofstream results("results.dat");
-	ofstream results_physics_variables("results_physics_variables.dat");
+	ofstream resultats("resultats.dat");
+	ofstream resultats_variables_physiques("resultats_variables_physiques.dat");
 
 	cout.precision(4);
 	cout<<std::fixed;
-	results.precision(7);
-	results<<std::scientific;
+	resultats.precision(7);
+	resultats<<std::scientific;
+	resultats_variables_physiques.precision(7);
+	resultats_variables_physiques<<std::scientific;
 	// ----
 
 
 	// Remplissage des vecteurs a, b, c. A REVOIR (Conditions au centre et au bord)
-	a[0]=0.;//normalement inutile
+/*	a[0]=0.;//normalement inutile
 	b[0]=1.;
 	c[0]=0.;
 
@@ -188,24 +219,32 @@ int main()
 	{
 		B[i]=0.; // A modif, second membre
 	}
+*/
 	// ----
 
 
-	// Résolution
+	// Résolution et écriture
+	initialisation_w();
+	
 	if(n!=0 and n!=1 and n!=5)
 	{
+		// resultats
+		// <<"z"<<"	"<<"w"<<"	"<<"q"<<endl;
+		// resultats_variables_physiques
+		// <<"r"<<"	"<<"rho"<<"	"<<"P"<<"	"<<"m"<<endl;
+
 		calcul_z();
 		calcul_w();
 		calcul_q();
 
 		for (unsigned int i = 0; i <= N; i += 1)
 		{
-			results
+			resultats
 			<< z[i] << "		"
 			<< w[i] << "		"
 			<< q[i] << endl;
 
-			results_physics_variables
+			resultats_variables_physiques
 			<< z[i]/A << "		"
 			<< pow(w[i],n)*rho_c << "		"
 			<< K*pow(pow(w[i],n)*rho_c,float(n+1)/float(n)) << "		"
@@ -214,6 +253,10 @@ int main()
 	}
 	else
 	{
+		// resultats
+		// <<"z"<<"	"<<"w"<<"	"<<"w_exact"<<"	"<<"q"<<endl;
+		// resultats_variables_physiques
+		// <<"r"<<"	"<<"rho"<<"	"<<"rho_exact"<<"	"<<"P"<<"	"<<"P_exact"<<"	"<<"m"<<endl;
 		calcul_z();
 		calcul_w();
 		calcul_w_exact();
@@ -221,13 +264,13 @@ int main()
 
 		for (unsigned int i = 0; i <= N; i += 1)
 		{
-			results
+			resultats
 			<< z[i] << "		"
 			<< w[i] << "		"
 			<< w_exact[i] << "		"
 			<< q[i] << endl;
 
-			results_physics_variables
+			resultats_variables_physiques
 			<< z[i]/A << "		"
 			<< K*pow(pow(w[i],n)*rho_c,float(n+1)/float(n)) << "		"
 			<< K*pow(pow(w_exact[i],n)*rho_c,float(n+1)/float(n)) << "		"
