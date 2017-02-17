@@ -1,18 +1,10 @@
 /*
-Programme de calcul de structure stellaire, utilisant les hypothèses :
--Gaz autogravitant à l'équilibre
--Chimiquement homogène
--Sans rotation propre
--Équation d'état polytropique
--Solutions à une dimension
--
+Programme de calcul de structure stellaire permettant de résoudre l'équation de Lane-Emden
 
 A faire :
--Trouver une valeur raisonnable de K. plus vers 1e7 ou 1e16 ou 1 ?
--Quelles données à entrer dans le programme ?
--Conditions en surface ?
--Modifier l'algo de résolution de w. Comment faire pour résoudre un syst non linéaire ?
-- !!!! problème en z=1 !!!!
+-Comment faire pour résoudre un syst non linéaire ?
+-Forcer dérivée à gauche
+-Revoir équation w[N]
 */
 
 
@@ -24,41 +16,42 @@ using namespace std;
 // ----
 
 
-// Données physiques
-const double 	G=6.6741e-11,
-				pi=3.1415; // constantes physiques et mathématiques
-double 			M=1.9891e30,
-				R=6.9634e8,
-				n=1.,
-				K=5e7;//e16; // Masse totale, rayon, indice polytropique et constante polytropique(a trouver)
+// Variables relatives aux calculs
+const float		n=1.; // valeur de l'indice polytropique
+
+const int 		N=500; // nombre de noeuds de la grille de calcul
+const float		z_max=4.; // valeur maximale de z
+const double 	h=z_max/double(N); // pas en z
+
+const double 	critere_convergence=1.e-7; // critère de convergence entre 2 itérations
+
+double 			q[N+1],z[N+1],w[N+1]; // Masse, rayon et densité adimensionnées
+double 			w_exact[N+1]; // densitée adimensionnée exacte
 // ----
 
 
-// Variables relatives aux calculs
-double 			P_c=(2.*G/pi*pow(R,4)),
-				rho_c=pow((P_c/K),n/(n+1)); // estimation pression et densité au centre
-double 			A=sqrt(4.*pi*G/(float(n+1)*K*pow(rho_c,(1-n)/n)));
-
-const int 		N=100; // nombre de noeuds de la grille de calcul
-const double 	h_r=R/N,h_z=A*h_r; // pas en r et z
-
-double 			q[N+1],z[N+1],w[N+1];
-double 			w_exact[N+1],w_GS[N+1],w_prec[N+1];
-
-// float 			omega=1.;
-// double 			a[N+1],b[N+1],c[N+1],B[N+1];
-float 			critere_convergence=0.001;
+// Définition des fichiers de sortie
+ofstream resultats("resultats.dat");
+ofstream resultats_variables_physiques("resultats_variables_physiques.dat");
+ofstream resultats_temp("resultats_temp.dat");
 // ----
 
 
 // Définition des fonctions
 void initialisation_w()
 {
-	// cout << "Initialisation : "<< endl;
-	for (int i = 0; i <= N; i++) // initialisation w quadratique
+	w[0]=1.;
+	for (int i = 1; i <= N; i++) // initialisation w quadratique
 	{
-		w[i]=1.-(1./2.)*pow(i*h_z,1);
-		// cout << w[i] << endl;
+		w[i]=1.-(1./10.)*pow(z[i],2);
+		/*
+		Tests :
+		1.;
+		1.-(1./2.)*pow(i*h,1);
+		cos(double(i)*h);
+		1.-double(i)*h;
+		sin(z[i])/z[i];
+		*/
 	}
 }
 
@@ -76,58 +69,62 @@ void initialisation_w()
 // }
 
 
-// bool test_convergence_w(int i)
-// {
-// 	float terme_de_gauche=pow(h_z,2)*pow(w[i],n)-2.*w[i];
-// 	float terme_de_droite=w[i+1]*((h_z/z[i])+1.) + w[i-1]*((h_z/z[i])-1.);
-// 	
-// 	if ( abs(terme_de_gauche-terme_de_droite)<critere_convergence )
-// 	{
-// 		return true;
-// 	}
-// 	else
-// 	{
-// 		return false;
-// 	}
-// }
-
-
 void calcul_w()
 {
-	w[0]=1.;
+	w[0]=1.; // Condition au centre de w
 	
-	bool convergence=false;
+	double w_prec[N+1]; // Sauvegarde de la valeur précédente de w
+	
+	bool convergence=false; // Booléen de convergence pour la boucle while
+	
+	int steps=0; // Nombre de pas de calcul avant convergence. Utile pour afficher tout les X pas
 	
 	while (convergence==false)
 	{
+		steps++;
+		
 		for (int i = 0; i <= N; i++)
 		{
-			w_prec[i]=w[i];
+			w_prec[i]=w[i]; // Sauvegarde de w dans w_prec
 		}
 		
+		w[1]=(1./4.)*(3.*w_prec[0]-w_prec[2]); // Dérivée nulle à gauche. OK???
+
 		convergence=true;
 		
-		for (int i = 1; i <= N; i++)
+		for (int i = 1; i < N; i++)
 		{
-			// "Forcage" de la dérivée nulle au centre
-			// w[1]=(1./4.)*(3.*w[0]-w[2]);
-			// ----
+			// Calcul de w[i] pour n=1 !!
+			w[i]=(1./(pow(h,2)-2.))*(w_prec[i+1]*((h/z[i])-1.) + w_prec[i-1]*(-(h/z[i])-1.));
+			// --- 
 			
-			/* Calcul de w[i] pour n=1 !! */
-			w[i]=(1./(pow(h_z,2)-2.))*(w[i+1]*((h_z/z[i])-1.) + w[i-1]*(-(h_z/z[i])-1.));
-			// w[i]=abs(w[i]);
-			// cout<<w[i]<<endl;
 			
 			if (abs(w_prec[i]-w[i])<critere_convergence) // A simplifier ?
 			{
-				convergence=convergence && true;
+				convergence=convergence && true; // convergence==true si tout les points de w convergent
 			}
 			else
 			{
-				convergence=convergence && false;
+				convergence=convergence && false; // Si un point ne converge pas, convergence==false
 			}
 		}
-		// getchar();
+		
+		if (steps%20000==0 or steps==1) // Affichage/Écriture pour le 1er pas puis tout les X pas
+		{
+			cout << steps << "	" << w[int(N/2)] << endl; // Affichage du pas et d'une valeur arbitraire de w
+			
+			for (int i = 0; i <= N; i++)
+			{
+				resultats_temp
+				<< z[i] << "		"
+				<< w[i] << "		"
+				<< w_exact[i] << endl; // Écriture des résultats temporaires
+			}
+		}
+		
+		w[N]=(1./((6.*h/z[N])+7.))*
+		(w[N-1]*(8.*(h/z[N])+14.)
+		+w[N-2]*(-2.*(h/z[N])-10.)+w[N-3]*(-2.)); // def de w[N] (car pb avec w_i+1 en N). OK???
 	}
 }
 
@@ -143,7 +140,7 @@ void calcul_w_exact()
 	}
 	if (n==1)
 	{
-		z[0]=1.;
+		w_exact[0]=1.; // Forcage de w_exact[0], car sinon pb limite
 		for (int i = 1; i <= N; i++)
 		{
 			w_exact[i] = sin(z[i])/z[i];
@@ -161,9 +158,11 @@ void calcul_w_exact()
 
 void calcul_z()
 {
-	for (int i = 0; i <= N; i++)
+	z[0]=0.;
+	
+	for (int i = 1; i <= N; i++)
 	{
-		z[i]=i*h_z;
+		z[i]=i*h;
 	}
 }
 
@@ -173,7 +172,7 @@ void calcul_q() // A MODIF ? Décentré ordre 2 ?
 	q[0]=0.;
 	for (int i = 1; i <= N; i++)
 	{
-		q[i]=-4.*pi*rho_c*(pow(z[i]/A,2)/A)*((w[i]-w[i-1])/h_z)*(1./M);// Schéma à gauche
+		q[i]=-4.;//*pi*rho_c*(pow(z[i]/A,2)/A)*((w[i]-w[i-1])/h)*(1./M);// Schéma à gauche
 	}
 }
 // ----
@@ -182,58 +181,26 @@ void calcul_q() // A MODIF ? Décentré ordre 2 ?
 int main()
 {
 	// Affichage d'informations sur le calcul
-	cout << "Modèle polytropique de structure stellaire pour une étoile de rayon "<<R<<"m et de masse "<<M<<"kg."<<endl;
-	cout <<"P_c = "<< P_c << "   rho_c = "<< rho_c << "   A = " << A << endl;
+	
 	// ----
-
-
-	// Définition des fichiers de sortie et de la précision
-	ofstream resultats("resultats.dat");
-	ofstream resultats_variables_physiques("resultats_variables_physiques.dat");
-
-	cout.precision(4);
-	cout<<std::fixed;
-	resultats.precision(7);
-	resultats<<std::scientific;
+	
+	
+	// Définition de la précision et du format des données
+	cout.precision(4); // Précision de l'affichage (4 chiffres)
+	cout<<std::fixed; // affichage fixé à 4 chiffres
+	resultats.precision(7); // Précision de l'écriture dans resultats
+	resultats<<std::scientific; // Nombres écrits en notation scientifique
 	resultats_variables_physiques.precision(7);
 	resultats_variables_physiques<<std::scientific;
 	// ----
-
-
-	// Remplissage des vecteurs a, b, c. A REVOIR (Conditions au centre et au bord)
-/*	a[0]=0.;//normalement inutile
-	b[0]=1.;
-	c[0]=0.;
-
-	a[N]=0.;
-	b[N]=1.;
-	c[N]=0.;//normalement inutile
-	for (unsigned int i = 1; i < N; i += 1)
-	{
-		a[i]=-1./pow(h_z,2)-1./(2.*i*h_z*h_z);
-		b[i]=2./pow(h_z,2);
-		c[i]=-1./pow(h_z,2)+1./(2.*i*h_z*h_z);
-	}
-
-	for (int i = 0; i <= N; i++)
-	{
-		B[i]=0.; // A modif, second membre
-	}
-*/
-	// ----
-
-
+	
+	
 	// Résolution et écriture
+	calcul_z();
 	initialisation_w();
 	
 	if(n!=0 and n!=1 and n!=5)
 	{
-		// resultats
-		// <<"z"<<"	"<<"w"<<"	"<<"q"<<endl;
-		// resultats_variables_physiques
-		// <<"r"<<"	"<<"rho"<<"	"<<"P"<<"	"<<"m"<<endl;
-
-		calcul_z();
 		calcul_w();
 		calcul_q();
 
@@ -244,22 +211,17 @@ int main()
 			<< w[i] << "		"
 			<< q[i] << endl;
 
-			resultats_variables_physiques
-			<< z[i]/A << "		"
-			<< pow(w[i],n)*rho_c << "		"
-			<< K*pow(pow(w[i],n)*rho_c,float(n+1)/float(n)) << "		"
-			<< q[i]*M << endl;
+			// resultats_variables_physiques
+			// << z[i]/A << "		"
+			// << pow(w[i],n)*rho_c << "		"
+			// << K*pow(pow(w[i],n)*rho_c,float(n+1)/float(n)) << "		"
+			// << q[i]*M << endl;
 		}
 	}
 	else
 	{
-		// resultats
-		// <<"z"<<"	"<<"w"<<"	"<<"w_exact"<<"	"<<"q"<<endl;
-		// resultats_variables_physiques
-		// <<"r"<<"	"<<"rho"<<"	"<<"rho_exact"<<"	"<<"P"<<"	"<<"P_exact"<<"	"<<"m"<<endl;
-		calcul_z();
-		calcul_w();
 		calcul_w_exact();
+		calcul_w();
 		calcul_q();
 
 		for (unsigned int i = 0; i <= N; i += 1)
@@ -270,15 +232,14 @@ int main()
 			<< w_exact[i] << "		"
 			<< q[i] << endl;
 
-			resultats_variables_physiques
-			<< z[i]/A << "		"
-			<< K*pow(pow(w[i],n)*rho_c,float(n+1)/float(n)) << "		"
-			<< K*pow(pow(w_exact[i],n)*rho_c,float(n+1)/float(n)) << "		"
-			<< pow(w[i],n)*rho_c << "		"
-			<< pow(w_exact[i],n)*rho_c << "		"
-			<< q[i]*M << endl;
+			// resultats_variables_physiques
+			// << z[i]/A << "		"
+			// << K*pow(pow(w[i],n)*rho_c,float(n+1)/float(n)) << "		"
+			// << K*pow(pow(w_exact[i],n)*rho_c,float(n+1)/float(n)) << "		"
+			// << pow(w[i],n)*rho_c << "		"
+			// << pow(w_exact[i],n)*rho_c << "		"
+			// << q[i]*M << endl;
 		}
 	}
 	// ---
-
 }

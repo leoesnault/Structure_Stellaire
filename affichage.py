@@ -16,7 +16,7 @@ else:
     
     z,w_calc,w_exact,q=results.T
     plt.axes(xlabel='z')#,yscale='log'
-    plt.plot(z,w_calc,'.r',z,w_exact,'.b')
+    plt.plot(z,w_calc,'r',z,w_exact,'.b')
     plt.legend(('w_calc','w_exact'))
 
 plt.show()

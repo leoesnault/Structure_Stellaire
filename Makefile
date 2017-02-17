@@ -15,5 +15,8 @@ compexec:
 display:
 	python3 affichage.py
 
+display_temp:
+	python3 affichage_temp.py
+
 display_variables_physiques:
 	python3 affichage_variables_physiques.py
