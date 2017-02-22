@@ -1,9 +1,9 @@
 CC=g++
-CFLAGS=-std=c++11 -Wall
+CFLAGS= -std=c++11 -Wall
 EXEC=prog.out
 SRC=prog.cpp
 
-all: clean compexec display
+all: clean compexec affichage
 
 clean:
 	rm -rf *.out
@@ -12,11 +12,11 @@ compexec:
 	$(CC) $(CFLAGS) $(SRC) -o $(EXEC)
 	./$(EXEC)
 
-display:
+affichage:
 	python3 affichage.py
 
-display_temp:
+affichage_temp:
 	python3 affichage_temp.py
 
-display_variables_physiques:
+affichage_variables_physiques:
 	python3 affichage_variables_physiques.py

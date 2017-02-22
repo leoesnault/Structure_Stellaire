@@ -19,11 +19,11 @@ using namespace std;
 // Variables relatives aux calculs
 const float		n=1.; // valeur de l'indice polytropique
 
-const int 		N=500; // nombre de noeuds de la grille de calcul
+const int 		N=100; // nombre de noeuds de la grille de calcul
 const float		z_max=4.; // valeur maximale de z
 const double 	h=z_max/double(N); // pas en z
 
-const double 	critere_convergence=1.e-7; // critère de convergence entre 2 itérations
+const double 	critere_convergence=1.e-8; // critère de convergence entre 2 itérations
 
 double 			q[N+1],z[N+1],w[N+1]; // Masse, rayon et densité adimensionnées
 double 			w_exact[N+1]; // densitée adimensionnée exacte
@@ -96,7 +96,7 @@ void calcul_w()
 		{
 			// Calcul de w[i] pour n=1 !!
 			w[i]=(1./(pow(h,2)-2.))*(w_prec[i+1]*((h/z[i])-1.) + w_prec[i-1]*(-(h/z[i])-1.));
-			// --- 
+			// ---
 			
 			
 			if (abs(w_prec[i]-w[i])<critere_convergence) // A simplifier ?
@@ -122,9 +122,7 @@ void calcul_w()
 			}
 		}
 		
-		w[N]=(1./((6.*h/z[N])+7.))*
-		(w[N-1]*(8.*(h/z[N])+14.)
-		+w[N-2]*(-2.*(h/z[N])-10.)+w[N-3]*(-2.)); // def de w[N] (car pb avec w_i+1 en N). OK???
+		w[N]=(1./(1.+(3.*h/z[N])+pow(h,2)))*(w[N-2]*((-h/z[N])-1.)+w[N-1]*(4.*(h/z[N])+2.));
 	}
 }
 
@@ -167,12 +165,12 @@ void calcul_z()
 }
 
 
-void calcul_q() // A MODIF ? Décentré ordre 2 ?
+void calcul_q() // A MODIF
 {
 	q[0]=0.;
 	for (int i = 1; i <= N; i++)
 	{
-		q[i]=-4.;//*pi*rho_c*(pow(z[i]/A,2)/A)*((w[i]-w[i-1])/h)*(1./M);// Schéma à gauche
+		q[i]=1.;
 	}
 }
 // ----
