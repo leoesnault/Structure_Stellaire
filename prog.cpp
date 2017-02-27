@@ -18,7 +18,7 @@ using namespace std;
 // Variables relatives aux calculs
 const float		n=1.; // valeur de l'indice polytropique
 
-const int 		N=100; // nombre de noeuds de la grille de calcul
+const int 		N=200; // nombre de noeuds de la grille de calcul
 const float		z_max=4.; // valeur maximale de z
 const double 	h=z_max/double(N); // pas en z
 
@@ -32,34 +32,41 @@ double 			w_prec[N+1]; // Sauvegarde de la valeur précédente de w
 
 // Définition des fichiers de sortie
 ofstream resultats("resultats.dat");
-ofstream resultats_variables_physiques("resultats_variables_physiques.dat");
 ofstream resultats_temp("resultats_temp.dat");
 // ----
 
 
 // Définition des fonctions
-double calcul_zeros(double nombre_de_depart,int i,double tolerance,int nombre_iterations_max)
+double f(double X, int i)
+{
+	return pow(h,2)*pow(X,n)-(1.+(3.*h/z[i]))*X-(w_prec[i-2]*((-h/z[i])-1.)+w_prec[i-1]*(4.*(h/z[i])+2.));
+}
+
+
+double Df(double X, int i)
+{
+	return n*pow(h,2)*pow(X,n-1)-(1.+(3.*h/z[i]));
+}
+
+
+double calcul_zeros_NR(double nombre_de_depart,int i,double tolerance,int nombre_iterations_max)
 {
 	// Méthode de Newton-Raphson
-	double second_membre=w_prec[i+1]*((h/z[i])-1.) + w_prec[i-1]*(-(h/z[i])-1.);
-	
 	int steps=0;
 	double X,Y=nombre_de_depart;
 	do	{
 		steps++;
-		// cout << steps << "    " << Y << endl; // affichage du calcul
+		if (steps%2000000==0)
+		{
+			cout << steps << "    " << Y << endl; // affichage du calcul
+			// Y=nombre_de_depart;
+		}
 		
 		// X_n+1 -> X_n
 		// Y = X_n+1 = X_n  - f(X_n) / Df(X_n)
 		
 		X=Y; 
-		Y=X-(pow(h,2)*pow(X,n)-2.*X-second_membre)/(n*pow(h,2)*pow(X,n-1)-2.);
-		
-		if (steps>nombre_iterations_max) // si le nombre d'itérations maximal est dépassé, afficher un message d'errreur et sortir
-			{
-			cout << "problème de convergence, nombre d'itérations autorisées dépassé"<<endl;
-			break;
-			}
+		Y=X-(f(X,i)/Df(X,i));
 
 		} while ( abs(Y-X) > tolerance ); // test de tolérance
 
@@ -67,19 +74,56 @@ double calcul_zeros(double nombre_de_depart,int i,double tolerance,int nombre_it
 }
 
 
+double calcul_zeros_dichotomie(double a, double b, int i, double tolerance)
+{
+	// Méthode de la dichotomie
+	double A=a,B=b,C;
+	int steps=0;
+	while(true)
+	{
+		steps++;
+		C=(A+B)/2.;
+		cout << steps << "	" << A << "	" << B << "	" << C << endl ;
+		if (abs(f(C,i))<tolerance)
+		{
+			cout << "1er if"<<endl;
+			return C;
+			break;
+		}
+		else
+		{
+			if (f(A,i)*f(B,i)<0.)
+			{
+				cout << "2eme if" << endl;
+				B=C;
+				getchar();
+			}
+			else
+			{
+				cout << "else else" << endl;
+				A=C;
+				// getchar();
+			}
+		}
+	}
+}
+
+
 void initialisation_w()
 {
 	for (int i = 0; i <= N; i++) // initialisation w quadratique
 	{
-		w[i]=1.-(1./10.)*pow(z[i],2);
+		w[i]=1.;
+		/*
+		1.-(1./10.)*pow(z[i],2);
+		
+		*/
 	}
 }
 
 
 void calcul_w()
-{
-	w[0]=1.; // Condition au centre de w
-		
+{		
 	bool convergence=false; // Booléen de convergence pour la boucle while
 	
 	int steps=0; // Nombre de pas de calcul avant convergence. Utile pour afficher tout les X pas
@@ -88,25 +132,58 @@ void calcul_w()
 	{
 		steps++;
 		
+		// Sauvegarde de w dans w_prec
 		for (int i = 0; i <= N; i++)
 		{
 			w_prec[i]=w[i]; // Sauvegarde de w dans w_prec
 		}
+		// ----
 		
+		
+		// Calcul de w
+		
+		w[0]=1.; // Condition au centre de w
 		w[1]=1.;//(1./4.)*(3.*w_prec[0]-w_prec[2]); // Dérivée nulle à gauche. OK???
 		
+// Schéma centré, partant du centre, avec borne à 0 à droite
+		// for (int i = 2; i < N; i++)
+		// {
+		// 	w[i]=(1./(pow(h,2)-2.))*(w_prec[i+1]*((h/z[i])-1.) + w_prec[i-1]*(-(h/z[i])-1.));
+		// }
+		// w[N]=-0.;
+		
+// Schéma excentré à gauche, partant du centre (Fonctionne !)
+		for (int i = 2 ; i<=N ; i++)
+		{
+			w[i]=(1./(1.+(3.*h/z[i])+pow(h,2)))*(w_prec[i-2]*((-h/z[i])-1.)+w_prec[i-1]*(4.*(h/z[i])+2.));
+		}
+		
+// Schéma excentré à gauche, partant du bord (Fonctionne !)
+		// for (int i = N ; i > 1 ; i--)
+		// {
+		// 	w[i]=(1./(1.+(3.*h/z[i])+pow(h,2)))*(w_prec[i-2]*((-h/z[i])-1.)+w_prec[i-1]*(4.*(h/z[i])+2.));
+		// }
+		
+// Les deux schémas qui se rejoignent à un point, partant du centre
+		// for (int i = 2; i <= int(float(N)/2.); i++)
+		// {
+		// 	w[i]=(1./(pow(h,2)-2.))*(w_prec[i+1]*((h/z[i])-1.) + w_prec[i-1]*(-(h/z[i])-1.));
+		// }
+		// 
+		// for (int i = int(float(N)/2.) ; i <= N; i++)
+		// {
+		// 	w[i]=(1./(1.+(3.*h/z[i])+pow(h,2)))*(w_prec[i-2]*((-h/z[i])-1.)+w_prec[i-1]*(4.*(h/z[i])+2.));
+		// }
+		
+		// ----
+		
+		
+		// Test de convergence
 		convergence=true;
 		
-		for (int i = 2; i <= N; i++)
+		for (int i = 0; i <= N; i++)
 		{
-			// Calcul de w[i] pour n=1 !! Avec schéma excentré à gauche
-			// w[i]=(1./(pow(h,2)-2.))*(w_prec[i+1]*((-h/z[i])-1.) + w_prec[i-1]*((h/z[i])-1.));
-			w[i]=(1./(1.+(3.*h/z[i])+pow(h,2)))*(w_prec[i-2]*((-h/z[i])-1.)+w_prec[i-1]*(4.*(h/z[i])+2.));
-			// ---
-			
-			// w[i]=calcul_zeros(w_prec[i],i,critere_convergence,1e3);
-			
-			if (abs(w_prec[i]-w[i])<critere_convergence) // A simplifier ?
+			if (abs(w_prec[i]-w[i])<critere_convergence)
 			{
 				convergence=convergence && true; // convergence==true si tout les points de w convergent
 			}
@@ -115,10 +192,13 @@ void calcul_w()
 				convergence=convergence && false; // Si un point ne converge pas, convergence==false
 			}
 		}
+		// ----
 		
-		if (steps%20==0 or steps==1) // Affichage/Écriture pour le 1er pas puis tout les X pas
+		
+		// Affichage temporaire
+		if (steps%20000==0 or steps==1) // Affichage/Écriture pour le 1er pas puis tout les X pas
 		{
-			cout << steps << "	" << w[int(N/2)] << endl; // Affichage du pas et d'une valeur arbitraire de w
+			cout << steps << "	" << w[int(float(N)/2.)] << endl; // Affichage du pas et d'une valeur arbitraire de w
 			
 			for (int i = 0; i <= N; i++)
 			{
@@ -128,9 +208,7 @@ void calcul_w()
 				<< w_exact[i] << endl; // Écriture des résultats temporaires
 			}
 		}
-		
-		// Pour n=1 :
-		// w[N]=(1./(1.+(3.*h/z[N])+pow(h,2)))*(w_prec[N-2]*((-h/z[N])-1.)+w_prec[N-1]*(4.*(h/z[N])+2.));
+		// ----
 	}
 }
 
@@ -199,8 +277,6 @@ int main()
 	cout<<std::fixed; // affichage fixé à 4 chiffres
 	resultats.precision(7); // Précision de l'écriture dans resultats
 	resultats<<std::scientific; // Nombres écrits en notation scientifique
-	resultats_variables_physiques.precision(7);
-	resultats_variables_physiques<<std::scientific;
 	// ----
 	
 	
@@ -219,12 +295,6 @@ int main()
 			<< z[i] << "		"
 			<< w[i] << "		"
 			<< q[i] << endl;
-
-			// resultats_variables_physiques
-			// << z[i]/A << "		"
-			// << pow(w[i],n)*rho_c << "		"
-			// << K*pow(pow(w[i],n)*rho_c,float(n+1)/float(n)) << "		"
-			// << q[i]*M << endl;
 		}
 	}
 	else
@@ -240,14 +310,6 @@ int main()
 			<< w[i] << "		"
 			<< w_exact[i] << "		"
 			<< q[i] << endl;
-
-			// resultats_variables_physiques
-			// << z[i]/A << "		"
-			// << K*pow(pow(w[i],n)*rho_c,float(n+1)/float(n)) << "		"
-			// << K*pow(pow(w_exact[i],n)*rho_c,float(n+1)/float(n)) << "		"
-			// << pow(w[i],n)*rho_c << "		"
-			// << pow(w_exact[i],n)*rho_c << "		"
-			// << q[i]*M << endl;
 		}
 	}
 	// ---

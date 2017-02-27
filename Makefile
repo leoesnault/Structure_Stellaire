@@ -6,7 +6,8 @@ SRC=prog.cpp
 all: clean compexec affichage
 
 clean:
-	rm -rf *.out
+	rm -f *.out
+	rm -f *.dat
 
 compexec:
 	$(CC) $(CFLAGS) $(SRC) -o $(EXEC)
