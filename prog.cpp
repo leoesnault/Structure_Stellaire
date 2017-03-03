@@ -27,6 +27,8 @@ const double 	critere_convergence=1.e-10; // critère de convergence entre 2 it�
 double 			q[N+1],z[N+1],w[N+1]; // Masse, rayon et densité adimensionnées
 double 			w_exact[N+1]; // densitée adimensionnée exacte
 double 			w_prec[N+1]; // Sauvegarde de la valeur précédente de w
+
+bool 			error_status=false;
 // ----
 
 
@@ -79,33 +81,44 @@ double calcul_zeros_dichotomie(double a, double b, int i, double tolerance)
 	// Méthode de la dichotomie
 	double A=a,B=b,C;
 	int steps=0;
+	
+	if (f(A,i)*f(B,i)>0)
+	{
+		cout << "Pas de changement de signe !"<<endl;
+		error_status=true;
+		goto endfunc;
+	}
+	if (abs(f(A,i))<tolerance)
+	{
+		return f(A,i);
+	}
+	if (abs(f(B,i))<tolerance)
+	{
+		return f(B,i);
+	}
+	
 	while(true)
 	{
 		steps++;
 		C=(A+B)/2.;
-		cout << steps << "	" << A << "	" << B << "	" << C << endl ;
 		if (abs(f(C,i))<tolerance)
 		{
-			cout << "1er if"<<endl;
 			return C;
 			break;
 		}
 		else
 		{
-			if (f(A,i)*f(B,i)<0.)
+			if (f(A,i)*f(C,i)>0.)
 			{
-				cout << "2eme if" << endl;
-				B=C;
-				getchar();
+				A=C;
 			}
 			else
 			{
-				cout << "else else" << endl;
-				A=C;
-				// getchar();
+				B=C;
 			}
 		}
 	}
+	endfunc:;
 }
 
 
@@ -113,7 +126,7 @@ void initialisation_w()
 {
 	for (int i = 0; i <= N; i++) // initialisation w quadratique
 	{
-		w[i]=1.;
+		w[i]=1.-pow(z[i],2)/6.;
 		/*
 		1.-(1./10.)*pow(z[i],2);
 		
@@ -128,7 +141,7 @@ void calcul_w()
 	
 	int steps=0; // Nombre de pas de calcul avant convergence. Utile pour afficher tout les X pas
 	
-	while (convergence==false)
+	while (convergence==false and error_status==false)
 	{
 		steps++;
 		
@@ -141,40 +154,56 @@ void calcul_w()
 		
 		
 		// Calcul de w
-		
 		w[0]=1.; // Condition au centre de w
-		w[1]=1.;//(1./4.)*(3.*w_prec[0]-w_prec[2]); // Dérivée nulle à gauche. OK???
+		// w[1]=(1./4.)*(3.*w_prec[0]-w_prec[2]); // Dérivée nulle à gauche. OK???
 		
-// Schéma centré, partant du centre, avec borne à 0 à droite
+	// Schéma centré, partant du centre, avec borne à 0 à droite
 		// for (int i = 2; i < N; i++)
 		// {
 		// 	w[i]=(1./(pow(h,2)-2.))*(w_prec[i+1]*((h/z[i])-1.) + w_prec[i-1]*(-(h/z[i])-1.));
 		// }
-		// w[N]=-0.;
+		// w[N]=0.;
 		
-// Schéma excentré à gauche, partant du centre (Fonctionne !)
+	// Schéma excentré à gauche, partant du centre
 		for (int i = 2 ; i<=N ; i++)
 		{
-			w[i]=(1./(1.+(3.*h/z[i])+pow(h,2)))*(w_prec[i-2]*((-h/z[i])-1.)+w_prec[i-1]*(4.*(h/z[i])+2.));
+			// w[i]=(1./(1.+(3.*h/z[i])+pow(h,2)))*(w_prec[i-2]*((-h/z[i])-1.)+w_prec[i-1]*(4.*(h/z[i])+2.));
+			w[i]=calcul_zeros_dichotomie(-10,10,i,1e-6);
 		}
 		
-// Schéma excentré à gauche, partant du bord (Fonctionne !)
+	// Schéma excentré à gauche, partant du bord
 		// for (int i = N ; i > 1 ; i--)
 		// {
 		// 	w[i]=(1./(1.+(3.*h/z[i])+pow(h,2)))*(w_prec[i-2]*((-h/z[i])-1.)+w_prec[i-1]*(4.*(h/z[i])+2.));
 		// }
 		
-// Les deux schémas qui se rejoignent à un point, partant du centre
-		// for (int i = 2; i <= int(float(N)/2.); i++)
+	// Les deux schémas qui se rejoignent à un point, partant du centre
+		// int borne=3; // int(float(N)/2.)
+		// for (int i = 2; i <= borne; i++)
 		// {
 		// 	w[i]=(1./(pow(h,2)-2.))*(w_prec[i+1]*((h/z[i])-1.) + w_prec[i-1]*(-(h/z[i])-1.));
 		// }
+		// w[N]=0.;
 		// 
-		// for (int i = int(float(N)/2.) ; i <= N; i++)
+		// for (int i = borne ; i <= N; i++)
 		// {
 		// 	w[i]=(1./(1.+(3.*h/z[i])+pow(h,2)))*(w_prec[i-2]*((-h/z[i])-1.)+w_prec[i-1]*(4.*(h/z[i])+2.));
 		// }
 		
+	// Les deux schémas qui se rejoignent à un point, partant du bord
+		// for (int i = N ; i > int(float(N)/2.); i--)
+		// {
+		// 	w[i]=(1./(1.+(3.*h/z[i])+pow(h,2)))*(w_prec[i-2]*((-h/z[i])-1.)+w_prec[i-1]*(4.*(h/z[i])+2.));
+		// }
+		// 
+		// for (int i = int(float(N)/2.); i >= 2; i--)
+		// {
+		// 	w[i]=(1./(pow(h,2)-2.))*(w_prec[i+1]*((h/z[i])-1.) + w_prec[i-1]*(-(h/z[i])-1.));
+		// }
+		
+		
+		// w[i]=calcul_zeros_NR(w[i],i,1e-6,1e6);
+		// w[i]=calcul_zeros_dichotomie(-1e2,1e2,i,1e-6)
 		// ----
 		
 		
@@ -196,7 +225,7 @@ void calcul_w()
 		
 		
 		// Affichage temporaire
-		if (steps%20000==0 or steps==1) // Affichage/Écriture pour le 1er pas puis tout les X pas
+		if (steps%1==0 or steps==1) // Affichage/Écriture pour le 1er pas puis tout les X pas
 		{
 			cout << steps << "	" << w[int(float(N)/2.)] << endl; // Affichage du pas et d'une valeur arbitraire de w
 			
@@ -279,38 +308,40 @@ int main()
 	resultats<<std::scientific; // Nombres écrits en notation scientifique
 	// ----
 	
-	
 	// Résolution et écriture
 	calcul_z();
+	calcul_w_exact();
 	initialisation_w();
-	
-	if(n!=0 and n!=1 and n!=5)
-	{
-		calcul_w();
-		calcul_q();
+	calcul_w();
+	calcul_q();
 
-		for (unsigned int i = 0; i <= N; i += 1)
+	if (error_status==false)
+	{
+		if(n!=0 and n!=1 and n!=5)
 		{
-			resultats
-			<< z[i] << "		"
-			<< w[i] << "		"
-			<< q[i] << endl;
+			for (unsigned int i = 0; i <= N; i += 1)
+			{
+				resultats
+				<< z[i] << "		"
+				<< w[i] << "		"
+				<< q[i] << endl;
+			}
+		}
+		else
+		{
+			for (unsigned int i = 0; i <= N; i += 1)
+			{
+				resultats
+				<< z[i] << "		"
+				<< w[i] << "		"
+				<< w_exact[i] << "		"
+				<< q[i] << endl;
+			}
 		}
 	}
 	else
 	{
-		calcul_w_exact();
-		calcul_w();
-		calcul_q();
-
-		for (unsigned int i = 0; i <= N; i += 1)
-		{
-			resultats
-			<< z[i] << "		"
-			<< w[i] << "		"
-			<< w_exact[i] << "		"
-			<< q[i] << endl;
-		}
+		cout << "Erreur ! Programme non executé."<<endl;
 	}
-	// ---
+		// ---
 }
