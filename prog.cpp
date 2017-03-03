@@ -2,8 +2,9 @@
 Programme de calcul de structure stellaire permettant de résoudre l'équation de Lane-Emden
 
 A faire :
--Forcer dérivée à gauche
--Revoir équation w[N]
+-Forcer dérivée au centre
+-Verifier calcul w (schéma exc. à gauche : divergence en N/2 mais racroche et converge en N+1 étapes ???)
+-Trouver critères pour NR et dichotomie -> w[i] et ±1000 a priori OK
 */
 
 
@@ -41,13 +42,21 @@ ofstream resultats_temp("resultats_temp.dat");
 // Définition des fonctions
 double f(double X, int i)
 {
-	return pow(h,2)*pow(X,n)-(1.+(3.*h/z[i]))*X-(w_prec[i-2]*((-h/z[i])-1.)+w_prec[i-1]*(4.*(h/z[i])+2.));
+	// Schéma excentré à gauche
+	// return pow(h,2)*pow(X,n)-(1.+(3.*h/z[i]))*X-(w_prec[i-2]*((-h/z[i])-1.)+w_prec[i-1]*(4.*(h/z[i])+2.));
+	
+	// Schéma centré
+	return pow(h,2)*pow(X,n)-2.*X-((w_prec[i+1]*((h/z[i])-1.) + w_prec[i-1]*(-(h/z[i])-1.)));
 }
 
 
 double Df(double X, int i)
 {
-	return n*pow(h,2)*pow(X,n-1)-(1.+(3.*h/z[i]));
+	// Schéma excentré à gauche
+	// return n*pow(h,2)*pow(X,n-1)-(1.+(3.*h/z[i]));
+	
+	// Schéma centré
+	return n*pow(h,2)*pow(X,n-1)-2.;
 }
 
 
@@ -58,14 +67,12 @@ double calcul_zeros_NR(double nombre_de_depart,int i,double tolerance,int nombre
 	double X,Y=nombre_de_depart;
 	do	{
 		steps++;
-		if (steps%2000000==0)
+		if (steps>nombre_iterations_max)
 		{
-			cout << steps << "    " << Y << endl; // affichage du calcul
-			// Y=nombre_de_depart;
+			cout << "Nombre d'itérations maximum dépassées." << endl;
+			error_status=true;
+			goto endfunc;
 		}
-		
-		// X_n+1 -> X_n
-		// Y = X_n+1 = X_n  - f(X_n) / Df(X_n)
 		
 		X=Y; 
 		Y=X-(f(X,i)/Df(X,i));
@@ -73,6 +80,7 @@ double calcul_zeros_NR(double nombre_de_depart,int i,double tolerance,int nombre
 		} while ( abs(Y-X) > tolerance ); // test de tolérance
 
 	return X;
+	endfunc:;
 }
 
 
@@ -148,7 +156,7 @@ void calcul_w()
 		// Sauvegarde de w dans w_prec
 		for (int i = 0; i <= N; i++)
 		{
-			w_prec[i]=w[i]; // Sauvegarde de w dans w_prec
+			w_prec[i]=w[i];
 		}
 		// ----
 		
@@ -156,19 +164,23 @@ void calcul_w()
 		// Calcul de w
 		w[0]=1.; // Condition au centre de w
 		// w[1]=(1./4.)*(3.*w_prec[0]-w_prec[2]); // Dérivée nulle à gauche. OK???
+		w[2]=-3.*w_prec[0]+4.*w_prec[1];
 		
 	// Schéma centré, partant du centre, avec borne à 0 à droite
-		// for (int i = 2; i < N; i++)
+		// for (int i = 1; i < N; i++)
 		// {
 		// 	w[i]=(1./(pow(h,2)-2.))*(w_prec[i+1]*((h/z[i])-1.) + w_prec[i-1]*(-(h/z[i])-1.));
+		// 	// w[i]=calcul_zeros_dichotomie(-1e3,1e3,i,1e-6);
+		// 	// w[i]=calcul_zeros_NR(w[i],i,1e-6,1e7);
 		// }
 		// w[N]=0.;
 		
 	// Schéma excentré à gauche, partant du centre
 		for (int i = 2 ; i<=N ; i++)
 		{
-			// w[i]=(1./(1.+(3.*h/z[i])+pow(h,2)))*(w_prec[i-2]*((-h/z[i])-1.)+w_prec[i-1]*(4.*(h/z[i])+2.));
-			w[i]=calcul_zeros_dichotomie(-10,10,i,1e-6);
+			w[i]=(1./(1.+(3.*h/z[i])+pow(h,2)))*(w_prec[i-2]*((-h/z[i])-1.)+w_prec[i-1]*(4.*(h/z[i])+2.));
+			// w[i]=calcul_zeros_dichotomie(-1e2,1e2,i,1e-6);
+			// w[i]=calcul_zeros_NR(w[i],i,1e-6,1e7);
 		}
 		
 	// Schéma excentré à gauche, partant du bord
@@ -178,7 +190,7 @@ void calcul_w()
 		// }
 		
 	// Les deux schémas qui se rejoignent à un point, partant du centre
-		// int borne=3; // int(float(N)/2.)
+		// int borne=N+1; // int(float(N)/2.)
 		// for (int i = 2; i <= borne; i++)
 		// {
 		// 	w[i]=(1./(pow(h,2)-2.))*(w_prec[i+1]*((h/z[i])-1.) + w_prec[i-1]*(-(h/z[i])-1.));
@@ -225,7 +237,7 @@ void calcul_w()
 		
 		
 		// Affichage temporaire
-		if (steps%1==0 or steps==1) // Affichage/Écriture pour le 1er pas puis tout les X pas
+		if (steps%20000==0 or steps==1) // Affichage/Écriture pour le 1er pas puis tout les X pas
 		{
 			cout << steps << "	" << w[int(float(N)/2.)] << endl; // Affichage du pas et d'une valeur arbitraire de w
 			
@@ -253,7 +265,7 @@ void calcul_w_exact()
 	}
 	if (n==1)
 	{
-		w_exact[0]=1.; // Forcage de w_exact[0], car sinon pb limite
+		w_exact[0]=1.; // w_exact[0] forcé à 1 car sinon pb limite
 		for (int i = 1; i <= N; i++)
 		{
 			w_exact[i] = sin(z[i])/z[i];
@@ -343,5 +355,5 @@ int main()
 	{
 		cout << "Erreur ! Programme non executé."<<endl;
 	}
-		// ---
+	// ---
 }
