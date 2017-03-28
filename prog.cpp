@@ -46,20 +46,20 @@ ofstream resultats_temp("resultats_temp.dat");
 double f(double X, int i)
 {
 	// Schéma excentré à gauche
-	// return pow(h,2)*pow(X,n)+(1.+(3.*h/z[i]))*X-(w_prec[i-2]*((-h/z[i])-1.)+w_prec[i-1]*(4.*(h/z[i])+2.));
+	return pow(h,2)*pow(X,n)+(1.+(3.*h/z[i]))*X-(w_prec[i-2]*((-h/z[i])-1.)+w_prec[i-1]*(4.*(h/z[i])+2.));
 	
 	// Schéma centré
-	return pow(h,2)*pow(X,n)-2.*X-((w_prec[i+1]*((-h/z[i])-1.) + w_prec[i-1]*((h/z[i])-1.)));
+	// return pow(h,2)*pow(X,n)-2.*X-((w_prec[i+1]*((-h/z[i])-1.) + w_prec[i-1]*((h/z[i])-1.)));
 }
 
 
 double Df(double X, int i)
 {
 	// Schéma excentré à gauche
-	// return n*pow(h,2)*pow(X,n-1)+(1.+(3.*h/z[i]));
+	return n*pow(h,2)*pow(X,n-1)+(1.+(3.*h/z[i]));
 	
 	// Schéma centré
-	return n*pow(h,2)*pow(X,n-1)-2.;
+	// return n*pow(h,2)*pow(X,n-1)-2.;
 }
 
 
@@ -147,7 +147,7 @@ void calcul_w()
 {		
 	bool convergence=false; // Booléen de convergence pour la boucle while
 	
-	int steps=0; // Nombre de pas de calcul avant convergence. Utile pour afficher tout les X pas
+	int steps=0; // Nombre de pas de calcul effectués. Utile pour afficher tout les X pas
 	
 	cout << "steps" << "	" << "w[N/2]" << endl;
 	
@@ -179,7 +179,7 @@ void calcul_w()
 		{
 			w[i]=(1./(pow(h,2)-2.))*(w_prec[i+1]*((-h/z[i])-1.)+w_prec[i-1]*((h/z[i])-1.));
 		}
-		
+		// 
 	// Schéma centré, partant du centre, calcul sans tenir compte de la parité
 		// w[N]=(1./(1.+(3.*h/z[N])+pow(h,2)))*(w[N-2]*((-h/z[N])-1.)+w[N-1]*(4.*(h/z[N])+2.));
 		// w[N]=-0.19; // Condition au bord forcée à -0,19 (pour commencer)
@@ -194,7 +194,7 @@ void calcul_w()
 		// {
 		// 	w[i]=(1./(1.+(3.*h/z[i])+pow(h,2)))*(w_prec[i-2]*((-h/z[i])-1.)+w_prec[i-1]*(4.*(h/z[i])+2.));
 		// 	// w[i]=calcul_zeros_dichotomie(-1e2,1e2,i,1e-6);
-		// 	// w[i]=calcul_zeros_NR(w[i],i,1e-6,1e7);
+		// 	// w[i]=calcul_zeros_NR(w_prec[i],i,1e-6,1e7);
 		// }
 		
 	// Les deux schémas qui se rejoignent au point "borne", partant du centre, calcul avec parité
@@ -252,7 +252,7 @@ void calcul_w()
 		
 		
 		// Affichage temporaire
-		if (steps%20000==0 or steps==1) // Affichage/Écriture pour le 1er pas puis tout les X pas
+		if (steps%10000==0 or steps==1) // Affichage/Écriture pour le 1er pas puis tout les X pas
 		{
 			cout << steps << "	" << w[int(float(N)/2.)] << endl; // Affichage du pas et d'une valeur arbitraire de w
 			
