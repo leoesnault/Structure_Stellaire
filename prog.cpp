@@ -23,7 +23,7 @@ using namespace std;
 const float		n=1.; // valeur de l'indice polytropique
 
 const int 		N=200; // nombre de noeuds de la grille de calcul
-const float		z_max=2.; // valeur maximale de z
+const float		z_max=4.; // valeur maximale de z
 const double 	h=z_max/double(N); // pas en z
 
 const double 	critere_convergence=1.e-10; // critère de convergence entre 2 itérations
