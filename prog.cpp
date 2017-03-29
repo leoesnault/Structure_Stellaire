@@ -23,7 +23,7 @@ using namespace std;
 const float		n=1.; // valeur de l'indice polytropique
 
 const int 		N=200; // nombre de noeuds de la grille de calcul
-const float		z_max=4.; // valeur maximale de z
+const float		z_max=2.; // valeur maximale de z
 const double 	h=z_max/double(N); // pas en z
 
 const double 	critere_convergence=1.e-10; // critère de convergence entre 2 itérations
@@ -165,19 +165,26 @@ void calcul_w()
 		
 		// Calcul de w
 		w[0]=1.; // Condition au centre de w
-		w[2]=-3.*w[0]+4.*w[1]; // Ici on force w[2]
+		w[1]=1./(1.+(pow(h,2)/6.));
+		// w[2]=-3.*w[0]+4.*w[1]; // Ici on force w[2]
 		
 	// Schéma centré, partant du centre, calcul tout les pas pairs, puis impairs 
 		// w[N]=(1./(1.+(3.*h/z[N])+pow(h,2)))*(w[N-2]*((-h/z[N])-1.)+w[N-1]*(4.*(h/z[N])+2.));
-		w[N] = -0.19; // Condition au bord forcée à -0,19 (pour commencer)
+		w[N] = 0.454972; // Condition au bord forcée à -0,19 (pour commencer)
 		
-		for (int i = 4; i < N; i+=2)
+		// for (int i = 4; i < N; i+=2)
+		// {
+		// 	w[i]=(1./(pow(h,2)-2.))*(w_prec[i+1]*((-h/z[i])-1.)+w_prec[i-1]*((h/z[i])-1.));
+		// }
+		// for (int i = 1; i < N-1; i+=2)
+		// {
+		// 	w[i]=(1./(pow(h,2)-2.))*(w_prec[i+1]*((-h/z[i])-1.)+w_prec[i-1]*((h/z[i])-1.));
+		// }
+		// 
+		
+		for (int i = 2; i < N; i++)
 		{
-			w[i]=(1./(pow(h,2)-2.))*(w_prec[i+1]*((-h/z[i])-1.)+w_prec[i-1]*((h/z[i])-1.));
-		}
-		for (int i = 1; i < N-1; i+=2)
-		{
-			w[i]=(1./(pow(h,2)-2.))*(w_prec[i+1]*((-h/z[i])-1.)+w_prec[i-1]*((h/z[i])-1.));
+			w[i]=(1./(pow(h,2)-2.))*(-w[i+1]*((h/z[i])+1.)+w[i-1]*((h/z[i])-1.));
 		}
 		// 
 	// Schéma centré, partant du centre, calcul sans tenir compte de la parité
