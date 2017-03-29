@@ -23,7 +23,7 @@ using namespace std;
 const float		n=1.; // valeur de l'indice polytropique
 
 const int 		N=200; // nombre de noeuds de la grille de calcul
-const float		z_max=4.; // valeur maximale de z
+const float		z_max=3.; // valeur maximale de z
 const double 	h=z_max/double(N); // pas en z
 
 const double 	critere_convergence=1.e-10; // critère de convergence entre 2 itérations
@@ -47,7 +47,7 @@ double f(double X, int i)
 {
 	// Schéma excentré à gauche
 	return pow(h,2)*pow(X,n)+(1.+(3.*h/z[i]))*X-(w_prec[i-2]*((-h/z[i])-1.)+w_prec[i-1]*(4.*(h/z[i])+2.));
-	
+
 	// Schéma centré
 	// return pow(h,2)*pow(X,n)-2.*X-((w_prec[i+1]*((-h/z[i])-1.) + w_prec[i-1]*((h/z[i])-1.)));
 }
@@ -57,7 +57,7 @@ double Df(double X, int i)
 {
 	// Schéma excentré à gauche
 	return n*pow(h,2)*pow(X,n-1)+(1.+(3.*h/z[i]));
-	
+
 	// Schéma centré
 	// return n*pow(h,2)*pow(X,n-1)-2.;
 }
@@ -76,8 +76,8 @@ double calcul_zeros_NR(double nombre_de_depart,int i,double tolerance,int nombre
 			error_status=true;
 			return NULL; // return foireux (sortie de fonction)
 		}
-		
-		X=Y; 
+
+		X=Y;
 		Y=X-(f(X,i)/Df(X,i));
 
 		} while ( abs(Y-X) > tolerance ); // test de tolérance
@@ -91,7 +91,7 @@ double calcul_zeros_dichotomie(double a, double b, int i, double tolerance)
 	// Méthode de la dichotomie
 	double A=a,B=b,C;
 	int steps=0;
-	
+
 	if (f(A,i)*f(B,i)>0)
 	{
 		cout << "Pas de changement de signe !"<<endl;
@@ -106,7 +106,7 @@ double calcul_zeros_dichotomie(double a, double b, int i, double tolerance)
 	{
 		return f(B,i);
 	}
-	
+
 	while(true)
 	{
 		steps++;
@@ -137,58 +137,76 @@ void initialisation_w()
 		w[i]=1.-pow(z[i],2)/6.;
 		/*
 		1.-(1./10.)*pow(z[i],2);
-		
+
 		*/
 	}
 }
 
 
 void calcul_w()
-{		
+{
 	bool convergence=false; // Booléen de convergence pour la boucle while
-	
+
 	int steps=0; // Nombre de pas de calcul effectués. Utile pour afficher tout les X pas
-	
+
 	cout << "steps" << "	" << "w[N/2]" << endl;
-	
+
 	while (convergence==false and error_status==false)
 	{
 		steps++;
-		
+
 		// Sauvegarde de w dans w_prec
 		for (int i = 0; i <= N; i++)
 		{
 			w_prec[i]=w[i];
 		}
 		// ----
-		
-		
+
+
 		// Calcul de w
 		w[0]=1.; // Condition au centre de w
-		w[2]=-3.*w[0]+4.*w[1]; // Ici on force w[2]
-		
-	// Schéma centré, partant du centre, calcul tout les pas pairs, puis impairs 
+		w[1]=1./(1.+pow(h,2)/6.);
+		// w[2]=-3.*w[0]+4.*w[1]; // Ici on force w[2]
+
+	// Schéma centré, partant du centre, calcul tout les pas pairs, puis impairs
 		// w[N]=(1./(1.+(3.*h/z[N])+pow(h,2)))*(w[N-2]*((-h/z[N])-1.)+w[N-1]*(4.*(h/z[N])+2.));
-		w[N] = -0.19; // Condition au bord forcée à -0,19 (pour commencer)
-		
-		for (int i = 4; i < N; i+=2)
+		// w[N] = 0.454972; // Condition au bord forcée à -0,19 (pour commencer)
+
+		for (int i = 2; i < N; i+=2)
 		{
 			w[i]=(1./(pow(h,2)-2.))*(w_prec[i+1]*((-h/z[i])-1.)+w_prec[i-1]*((h/z[i])-1.));
 		}
+
+		// Calcul de w[N]
+		double A=1.+3.*(h/z[N])+pow(h,2);
+		double B=(h/z[N-1])+1.;
+		double C=4.*(h/z[N])+2.;
+		double D=(h/z[N-1])-1.;
+		double E=pow(h,2)-2.;
+		double F=(h/z[N])+1.;
+
+		w[N]=(1./(A+B*C/E))*(-F+D*C/E)*w[N-2];
+
+
 		for (int i = 1; i < N-1; i+=2)
 		{
 			w[i]=(1./(pow(h,2)-2.))*(w_prec[i+1]*((-h/z[i])-1.)+w_prec[i-1]*((h/z[i])-1.));
 		}
-		// 
+
+
+		// for (int i = 1; i < N; i++)
+		// {
+		// 	w[i]=(1./(pow(h,2)-2.))*(w_prec[i+1]*((-h/z[i])-1.)+w_prec[i-1]*((h/z[i])-1.));
+		// }
 	// Schéma centré, partant du centre, calcul sans tenir compte de la parité
 		// w[N]=(1./(1.+(3.*h/z[N])+pow(h,2)))*(w[N-2]*((-h/z[N])-1.)+w[N-1]*(4.*(h/z[N])+2.));
 		// w[N]=-0.19; // Condition au bord forcée à -0,19 (pour commencer)
-		
+
 		// for (int i = 1; i < N; i+=1)
 		// {
 		// 	w[i]=(1./(pow(h,2)-2.))*(w_prec[i+1]*((-h/z[i])-1.)+w_prec[i-1]*((h/z[i])-1.));
 		// }
-		
+
 	// Schéma excentré à gauche, partant du centre
 		// for (int i = 2 ; i<=N ; i++)
 		// {
@@ -196,10 +214,10 @@ void calcul_w()
 		// 	// w[i]=calcul_zeros_dichotomie(-1e2,1e2,i,1e-6);
 		// 	// w[i]=calcul_zeros_NR(w_prec[i],i,1e-6,1e7);
 		// }
-		
+
 	// Les deux schémas qui se rejoignent au point "borne", partant du centre, calcul avec parité
 		// int borne=4;
-		
+
 		// for (int i = 4; i < borne; i+=2)
 		// {
 		// 	w[i]=(1./(pow(h,2)-2.))*(w_prec[i+1]*((-h/z[i])-1.)+w_prec[i-1]*((h/z[i])-1.));
@@ -208,12 +226,12 @@ void calcul_w()
 		// {
 		// 	w[i]=(1./(pow(h,2)-2.))*(w_prec[i+1]*((-h/z[i])-1.)+w_prec[i-1]*((h/z[i])-1.));
 		// }
-		
+
 		// for (int i = borne; i <= N; i++)
 		// {
 		// 	w[i]=(1./(1.+(3.*h/z[i])+pow(h,2)))*(w_prec[i-2]*((-h/z[i])-1.)+w_prec[i-1]*(4.*(h/z[i])+2.));
-		// }		
-		
+		// }
+
 	// Les deux schémas qui se rejoignent au point "borne", partant du centre, calcul sans parité
 		// int borne=4;
 
@@ -221,22 +239,22 @@ void calcul_w()
 		// {
 		// 	w[i]=(1./(pow(h,2)-2.))*(w_prec[i+1]*((-h/z[i])-1.)+w_prec[i-1]*((h/z[i])-1.));
 		// }
-		
+
 		// for (int i = borne; i <= N; i++)
 		// {
 		// 	w[i]=(1./(1.+(3.*h/z[i])+pow(h,2)))*(w_prec[i-2]*((-h/z[i])-1.)+w_prec[i-1]*(4.*(h/z[i])+2.));
 		// }
-		
+
 	// Synthaxe du calcul de zéros (à laisser en commentaire)
 		// w[i]=calcul_zeros_NR(w[i],i,1e-6,1e6);
 		// w[i]=calcul_zeros_dichotomie(-1e2,1e2,i,1e-6)
-		
+
 		// ----
-		
-		
+
+
 		// Test de convergence
 		convergence=true;
-		
+
 		for (int i = 0; i <= N; i++)
 		{
 			if (abs(w_prec[i]-w[i])<critere_convergence)
@@ -249,13 +267,13 @@ void calcul_w()
 			}
 		}
 		// ----
-		
-		
+
+
 		// Affichage temporaire
 		if (steps%10000==0 or steps==1) // Affichage/Écriture pour le 1er pas puis tout les X pas
 		{
 			cout << steps << "	" << w[int(float(N)/2.)] << endl; // Affichage du pas et d'une valeur arbitraire de w
-			
+
 			for (int i = 0; i <= N; i++)
 			{
 				resultats_temp
@@ -299,7 +317,7 @@ void calcul_w_exact()
 void calcul_z()
 {
 	z[0]=0.;
-	
+
 	for (int i = 1; i <= N; i++)
 	{
 		z[i]=i*h;
@@ -310,12 +328,12 @@ void calcul_z()
 void calcul_q()
 {
 	q[0]=0.;
-		
+
 	for (int i = 1; i < N; i++)
 	{
 		q[i]=(-1./z[i])*((-w[i-1]+w[i+1])/2.*h)*pow(z[i],3);
 	}
-	
+
 	q[N]=(-1./z[N])*((w[N-2]-4.*w[N-1]+3.*w[N])/2.*h)*pow(z[N],3); // A re-vérif une fois que calcul_w OK
 }
 // ----
@@ -324,17 +342,17 @@ void calcul_q()
 int main()
 {
 	// Affichage d'informations sur le calcul
-	
+
 	// ----
-	
-	
+
+
 	// Définition de la précision et du format des données
 	cout.precision(4); // Précision de l'affichage (4 chiffres)
 	cout<<std::fixed; // affichage fixé à 4 chiffres
 	resultats.precision(7); // Précision de l'écriture dans resultats
 	resultats<<std::scientific; // Nombres écrits en notation scientifique
 	// ----
-	
+
 	// Résolution et écriture
 	calcul_z();
 	calcul_w_exact();

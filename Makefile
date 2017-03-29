@@ -1,5 +1,6 @@
 CC=g++
 CFLAGS= -std=c++11 -Wall
+PY=python
 EXEC=prog.out
 SRC=prog.cpp
 
@@ -14,10 +15,10 @@ compexec:
 	./$(EXEC)
 
 affichage:
-	python3 affichage.py
+	$(PY) affichage.py
 
 affichage_temp:
-	python3 affichage_temp.py
+	$(PY) affichage_temp.py
 
 affichage_variables_physiques:
-	python3 affichage_variables_physiques.py
+	$(PY) affichage_variables_physiques.py
