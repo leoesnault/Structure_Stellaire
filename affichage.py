@@ -9,7 +9,7 @@ if len(results[1])==3:
     plt.plot(z,w_calc,'.r')#,z,q,'.b')
     plt.legend(('w_calc','q'))
     plt.grid()
-    plt.title("Évolution de la densité adimensionnée en fonction du rayon adimensionné, pour un schéma à gauche et n=6")
+    plt.title("Évolution de la densité adimensionnée en fonction du rayon adimensionné, pour un schéma à gauche et n=3/2")
 else:
     z,w_calc,w_exact,q=results.T
     plt.axes(xlabel='z')#,yscale='log'

@@ -20,7 +20,7 @@ using namespace std;
 
 
 // Variables relatives aux calculs
-double			n=5.; // valeur de l'indice polytropique
+double			n=1.; // valeur de l'indice polytropique
 
 const int 		N=2000; // nombre de noeuds de la grille de calcul
 const float		z_max=40.; // valeur maximale de z
