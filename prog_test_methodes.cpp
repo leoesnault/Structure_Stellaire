@@ -18,16 +18,10 @@ using namespace std;
 
 
 // Variables relatives aux calculs
-const float		n=1.; // valeur de l'indice polytropique
-
-const int 		N=100; // nombre de noeuds de la grille de calcul
-const float		z_max=4.; // valeur maximale de z
-const double 	h=z_max/double(N); // pas en z
-
-const double 	critere_convergence=1.e-8; // critère de convergence entre 2 itérations
-
-double 			q[N+1],z[N+1],w[N+1]; // Masse, rayon et densité adimensionnées
-double 			w_exact[N+1]; // densitée adimensionnée exacte
+const int N=100000;
+int steps_NR[N],steps_dichotomie[N];
+double t_NR[N],t_dichotomie[N];
+double NR,dichotomie;
 // ----
 
 
@@ -52,20 +46,20 @@ double Df(double X)
 double calcul_zeros_NR(double nombre_de_depart,int i,double tolerance)
 {
 	// Méthode de Newton-Raphson
-	int steps=0;
+	steps_NR[i]=0;
 	double X,Y=nombre_de_depart;
 	do	{
-		steps++;
-		if (steps%2000000==0)
-		{
-			cout << steps << "    " << Y << endl; // affichage du calcul
-			// Y=nombre_de_depart;
-		}
-		
+		steps_NR[i]++;
+		// if (steps_NR%2000000==0)
+		// {
+		// 	cout << steps_NR[i] << "    " << Y << endl; // affichage du calcul
+		// 	// Y=nombre_de_depart;
+		// }
+
 		// X_n+1 -> X_n
 		// Y = X_n+1 = X_n  - f(X_n) / Df(X_n)
-		
-		X=Y; 
+
+		X=Y;
 		Y=X-(f(X)/Df(X));
 
 		} while ( abs(Y-X) > tolerance ); // test de tolérance
@@ -77,9 +71,9 @@ double calcul_zeros_NR(double nombre_de_depart,int i,double tolerance)
 double calcul_zeros_dichotomie(double a, double b, int i, double tolerance)
 {
 	// Méthode de la dichotomie
+	steps_dichotomie[i]=0;
 	double A=a,B=b,C;
-	int steps=0;
-	
+
 	if (abs(f(A))<tolerance)
 	{
 		return f(A);
@@ -95,10 +89,10 @@ double calcul_zeros_dichotomie(double a, double b, int i, double tolerance)
 	}
 	while(true)
 	{
-		steps++;
+		steps_dichotomie[i]++;
 		C=(A+B)/2.;
 		// cout << steps << "	" << A << "	" << B << "	" << C << endl ;
-		if (abs(f(C))<tolerance or steps==10000)
+		if (abs(f(C))<tolerance)
 		{
 			// cout << "1er if"<<endl;
 			return C;
@@ -126,31 +120,33 @@ double calcul_zeros_dichotomie(double a, double b, int i, double tolerance)
 int main()
 {
 	// Affichage d'informations sur le calcul
-	
+
 	// ----
-	
+
 	// Définition de la précision et du format des données
 	cout.precision(4); // Précision de l'affichage (4 chiffres)
 	cout<<std::fixed; // affichage fixé à 4 chiffres
 	// ----
-	
-	int N=100000;
-	double NR[N],dichotomie[N],t_NR[N],t_dichotomie[N];
-	
+	double i_by=20.;
+
 	t_NR[0]=clock();
+	steps_NR[0]=0;
 	for (int i = 1; i <= N; i++) {
-		NR[i]=calcul_zeros_NR(i,0,1e-6);
+		NR=calcul_zeros_NR(i/i_by,i,1e-6);
 		t_NR[i]=clock()-t_NR[i-1];
 	}
-	
+
+	steps_dichotomie[0]=0;
 	t_dichotomie[0]=clock();
 	for (int i = 1; i <= N; i++) {
-		dichotomie[i]=calcul_zeros_dichotomie(0.,i,0,1e-6);
+		dichotomie=calcul_zeros_dichotomie(0.,1.+i/i_by,i,1e-6);
 		t_dichotomie[i]=clock()-t_dichotomie[i-1];
 	}
-	
-	
+
+
 	for (int i = 1; i <= N; i++) {
-		resultats_comparaison_methodes << i << "	" << t_NR[i] << "	" << t_dichotomie[i] << endl;
+		resultats_comparaison_methodes
+		<< i/i_by << "	" << t_NR[i] << "	" << steps_NR[i] << "	"
+		<< t_dichotomie[i] << "	" << steps_dichotomie <<endl;
 	}
 }
