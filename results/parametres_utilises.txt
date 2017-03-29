@@ -1,0 +1,6 @@
+Pour le schéma de relaxation à gauche :
+n=2.000001 pour n=2 (sinon pas de convergence)
+critere_convergence=1e-10
+z_max=40.
+N=2000
+Schéma de Newton pour l'équation non linéaire (valeur de départ=0.2,i,critere_convergence,1e6)

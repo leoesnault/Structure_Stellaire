@@ -1,6 +1,6 @@
 CC=g++
 CFLAGS= -std=c++11 -Wall
-PY=python
+PY=python3
 EXEC=prog.out
 SRC=prog.cpp
 

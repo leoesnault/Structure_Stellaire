@@ -20,10 +20,10 @@ using namespace std;
 
 
 // Variables relatives aux calculs
-const float		n=1.; // valeur de l'indice polytropique
+double			n=5.; // valeur de l'indice polytropique
 
-const int 		N=200; // nombre de noeuds de la grille de calcul
-const float		z_max=4.; // valeur maximale de z
+const int 		N=2000; // nombre de noeuds de la grille de calcul
+const float		z_max=40.; // valeur maximale de z
 const double 	h=z_max/double(N); // pas en z
 
 const double 	critere_convergence=1.e-10; // critère de convergence entre 2 itérations
@@ -46,7 +46,7 @@ ofstream resultats_temp("resultats_temp.dat");
 double f(double X, int i)
 {
 	// Schéma excentré à gauche
-	return pow(h,2)*pow(X,n)+(1.+(3.*h/z[i]))*X-(w_prec[i-2]*((-h/z[i])-1.)+w_prec[i-1]*(4.*(h/z[i])+2.));
+	return pow(h,2)*pow(X,n)+(1.+(3.*h/z[i]))*X-(w[i-2]*((-h/z[i])-1.)+w[i-1]*(4.*(h/z[i])+2.));
 	
 	// Schéma centré
 	// return pow(h,2)*pow(X,n)-2.*X-((w_prec[i+1]*((-h/z[i])-1.) + w_prec[i-1]*((h/z[i])-1.)));
@@ -170,23 +170,30 @@ void calcul_w()
 		
 	// Schéma centré, partant du centre, calcul tout les pas pairs, puis impairs 
 		// w[N]=(1./(1.+(3.*h/z[N])+pow(h,2)))*(w[N-2]*((-h/z[N])-1.)+w[N-1]*(4.*(h/z[N])+2.));
-		w[N] = 0.454972; // Condition au bord forcée à -0,19 (pour commencer)
+		// w[N] = 0.454972; // Condition au bord forcée à -0,19 (pour commencer)
 		
-		// for (int i = 4; i < N; i+=2)
+		// for (int i = 2; i <= N-2; i+=2)
 		// {
 		// 	w[i]=(1./(pow(h,2)-2.))*(w_prec[i+1]*((-h/z[i])-1.)+w_prec[i-1]*((h/z[i])-1.));
 		// }
+		
+		
+		// Calcul de w[N]
+		// double A=1.+3.*(h/z[N])+pow(h,2);
+		// double B=(h/z[N-1])+1.;
+		// double C=4.*(h/z[N])+2.;
+		// double D=(h/z[N-1])-1.;
+		// double E=pow(h,2)-2.;
+		// double F=(h/z[N])+1.;
+		// 
+		// w[N]=(1./(A+B*C/E))*(-F+D*C/E)*w_prec[N-2];
+
+
 		// for (int i = 1; i < N-1; i+=2)
 		// {
 		// 	w[i]=(1./(pow(h,2)-2.))*(w_prec[i+1]*((-h/z[i])-1.)+w_prec[i-1]*((h/z[i])-1.));
 		// }
-		// 
 		
-		for (int i = 2; i < N; i++)
-		{
-			w[i]=(1./(pow(h,2)-2.))*(-w[i+1]*((h/z[i])+1.)+w[i-1]*((h/z[i])-1.));
-		}
-		// 
 	// Schéma centré, partant du centre, calcul sans tenir compte de la parité
 		// w[N]=(1./(1.+(3.*h/z[N])+pow(h,2)))*(w[N-2]*((-h/z[N])-1.)+w[N-1]*(4.*(h/z[N])+2.));
 		// w[N]=-0.19; // Condition au bord forcée à -0,19 (pour commencer)
@@ -197,12 +204,12 @@ void calcul_w()
 		// }
 		
 	// Schéma excentré à gauche, partant du centre
-		// for (int i = 2 ; i<=N ; i++)
-		// {
-		// 	w[i]=(1./(1.+(3.*h/z[i])+pow(h,2)))*(w_prec[i-2]*((-h/z[i])-1.)+w_prec[i-1]*(4.*(h/z[i])+2.));
-		// 	// w[i]=calcul_zeros_dichotomie(-1e2,1e2,i,1e-6);
-		// 	// w[i]=calcul_zeros_NR(w_prec[i],i,1e-6,1e7);
-		// }
+		for (int i = 2 ; i<=N ; i++)
+		{
+			// w[i]=(1./(1.+(3.*h/z[i])+pow(h,2)))*(w_prec[i-2]*((-h/z[i])-1.)+w_prec[i-1]*(4.*(h/z[i])+2.));
+			// w[i]=calcul_zeros_dichotomie(-1e2,1e2,i,1e-6);
+			w[i]=calcul_zeros_NR(0.2,i,critere_convergence,1e6);
+		}
 		
 	// Les deux schémas qui se rejoignent au point "borne", partant du centre, calcul avec parité
 		// int borne=4;
@@ -323,7 +330,7 @@ void calcul_q()
 		q[i]=(-1./z[i])*((-w[i-1]+w[i+1])/2.*h)*pow(z[i],3);
 	}
 	
-	q[N]=(-1./z[N])*((w[N-2]-4.*w[N-1]+3.*w[N])/2.*h)*pow(z[N],3); // A re-vérif une fois que calcul_w OK
+	// q[N]=(-1./z[N])*((w[N-2]-4.*w[N-1]+3.*w[N])/2.*h)*pow(z[N],3); // A re-vérif une fois que calcul_w OK
 }
 // ----
 
