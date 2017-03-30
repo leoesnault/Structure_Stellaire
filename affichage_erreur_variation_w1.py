@@ -1,14 +1,17 @@
 from matplotlib import pyplot as plt
 import numpy as np
 
-results_N0100=np.loadtxt("resultats_erreur_variation_N/resultats_N0100.dat")
-results_N0200=np.loadtxt("resultats_erreur_variation_N/resultats_N0200.dat")
-results_N0600=np.loadtxt("resultats_erreur_variation_N/resultats_N0600.dat")
-results_N1000=np.loadtxt("resultats_erreur_variation_N/resultats_N1000.dat")
-results_N1325=np.loadtxt("resultats_erreur_variation_N/resultats_N1325.dat")
-results_N2550=np.loadtxt("resultats_erreur_variation_N/resultats_N2550.dat")
-results_N3775=np.loadtxt("resultats_erreur_variation_N/resultats_N3775.dat")
-results_N5000=np.loadtxt("resultats_erreur_variation_N/resultats_N5000.dat")
+results_00=np.loadtxt("resultats_variation_w1/resultats_00pc.dat")
+
+results_p01=np.loadtxt("resultats_variation_w1/resultats_plus_01pc.dat")
+results_p05=np.loadtxt("resultats_variation_w1/resultats_plus_05pc.dat")
+results_p10=np.loadtxt("resultats_variation_w1/resultats_plus_10pc.dat")
+results_p20=np.loadtxt("resultats_variation_w1/resultats_plus_20pc.dat")
+
+results_m01=np.loadtxt("resultats_variation_w1/resultats_moins_01pc.dat")
+results_m05=np.loadtxt("resultats_variation_w1/resultats_moins_05pc.dat")
+results_m10=np.loadtxt("resultats_variation_w1/resultats_moins_10pc.dat")
+results_m20=np.loadtxt("resultats_variation_w1/resultats_moins_20pc.dat")
 
 z0100,w_calc0100,w_exact0100,q0100=results_N0100.T
 z0200,w_calc0200,w_exact0200,q0200=results_N0200.T

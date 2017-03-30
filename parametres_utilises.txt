@@ -12,3 +12,12 @@ n=1
 z_max=40
 critere_convergence=1e-10
 Schéma de Newton pour l'équation non linéaire (valeur de départ=0.2,i,critere_convergence,1e6)
+
+Variation de w[1] en % (0, 1, 5, 10, 20)
+n=1
+z_max=40
+critere_convergence=1e-10
+Schéma de Newton pour l'équation non linéaire (valeur de départ=0.2,i,critere_convergence,1e6)n=1
+z_max=40
+critere_convergence=1e-10
+Schéma de Newton pour l'équation non linéaire (valeur de départ=0.2,i,critere_convergence,1e6)
