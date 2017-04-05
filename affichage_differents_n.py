@@ -21,10 +21,16 @@ z1,w_calc1,w_exact1,q1=results_n1.T
 z5,w_calc5,w_exact5,q5=results_n5.T
 
 plt.axes(xlabel='z')#,yrange=[-0.5,1.2])
-plt.plot(z0,w_calc0,'.-',z1,w_calc1,'.-',z2,w_calc2,'.-',z3,w_calc3,'.-',z4,w_calc4,'.-',z5,w_calc5,'.-',z6,w_calc6,'.-',z7,w_calc7,'.-')
-plt.legend(('w_calc(n=0)','w_calc(n=1)','w_calc(n=2)','w_calc(n=3)','w_calc(n=4)','w_calc(n=5)','w_calc(n=6)','w_calc(n=7)'))
+# plt.plot(z0,w_calc0,'.-',z1,w_calc1,'.-',z2,w_calc2,'.-',z3,w_calc3,'.-',z4,w_calc4,'.-',z5,w_calc5,'.-',z6,w_calc6,'.-',z7,w_calc7,'.-')
+# plt.legend(('w_calc(n=0)','w_calc(n=1)','w_calc(n=2)','w_calc(n=3)','w_calc(n=4)','w_calc(n=5)','w_calc(n=6)','w_calc(n=7)'))
+# plt.grid()
+# plt.title("Évolution de la densité adimensionnée en fonction du rayon adimensionné, pour un schéma à gauche et différents n")
+
+plt.plot(z0,q0,'.-',z1,q1,'.-',z2,q2,'.-',z3,q3,'.-',z4,q4,'.-',z5,q5,'.-',z6,q6,'.-',z7,q7,'.-')
+plt.legend(('q(n=0)','q(n=1)','q(n=2)','q(n=3)','q(n=4)','q(n=5)','q(n=6)','q(n=7)'))
 plt.grid()
-plt.title("Évolution de la densité adimensionnée en fonction du rayon adimensionné, pour un schéma à gauche et différents n")
+plt.title("Évolution de la masse adimensionnée en fonction du rayon adimensionné, pour un schéma à gauche et différents n")
+
 
 
 plt.show()
