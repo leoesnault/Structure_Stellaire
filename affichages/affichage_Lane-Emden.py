@@ -1,7 +1,7 @@
 from matplotlib import pyplot as plt
 import numpy as np
 
-results=np.loadtxt("resultats.dat")
+results=np.loadtxt("../exe/resultats_Lane-Emden.dat")
 
 if len(results[1])==3:
     z,w_calc,q=results.T

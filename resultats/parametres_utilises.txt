@@ -1,0 +1,20 @@
+Pour le schéma de relaxation à gauche :
+
+Variation n de 0 à 7
+n=2.000001 pour n=2 (sinon pas de convergence)
+critere_convergence=1e-10
+z_max=40.
+N=2000
+Schéma de Newton pour l'équation non linéaire (valeur de départ=w[i-1],i,critere_convergence,1e6)
+
+Variation N de 100 à 5000 par pas de 1225 (100, 1325, 2550, 3775, 5000) puis 200, 600, 1000
+n=1
+z_max=40
+critere_convergence=1e-10
+Schéma de Newton pour l'équation non linéaire (valeur de départ=w[i-1],i,critere_convergence,1e6)
+
+Variation de w[1] en % (0, 1, 5, 10, 20)
+n=1
+z_max=40
+critere_convergence=1e-10
+Schéma de Newton pour l'équation non linéaire (valeur de départ=w[i-1],i,critere_convergence,1e6)

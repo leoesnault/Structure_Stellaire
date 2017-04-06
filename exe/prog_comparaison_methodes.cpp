@@ -1,10 +1,6 @@
 /*
 Programme de calcul de structure stellaire permettant de résoudre l'équation de Lane-Emden
 
-A faire :
--Comment faire pour résoudre un syst non linéaire ?
--Forcer dérivée à gauche
--Revoir équation w[N]
 */
 
 
@@ -50,14 +46,6 @@ double calcul_zeros_NR(double nombre_de_depart,int i,double tolerance)
 	double X,Y=nombre_de_depart;
 	do	{
 		steps_NR[i]++;
-		// if (steps_NR%2000000==0)
-		// {
-		// 	cout << steps_NR[i] << "    " << Y << endl; // affichage du calcul
-		// 	// Y=nombre_de_depart;
-		// }
-
-		// X_n+1 -> X_n
-		// Y = X_n+1 = X_n  - f(X_n) / Df(X_n)
 
 		X=Y;
 		Y=X-(f(X)/Df(X));
@@ -91,25 +79,19 @@ double calcul_zeros_dichotomie(double a, double b, int i, double tolerance)
 	{
 		steps_dichotomie[i]++;
 		C=(A+B)/2.;
-		// cout << steps << "	" << A << "	" << B << "	" << C << endl ;
 		if (abs(f(C))<tolerance)
 		{
-			// cout << "1er if"<<endl;
 			return C;
 		}
 		else
 		{
 			if (f(A)*f(C)>0.)
 			{
-				// cout << "2eme if" << endl;
 				A=C;
-				// getchar();
 			}
 			else
 			{
-				// cout << "else else" << endl;
 				B=C;
-				// getchar();
 			}
 		}
 	}
@@ -127,6 +109,7 @@ int main()
 	cout.precision(4); // Précision de l'affichage (4 chiffres)
 	cout<<std::fixed; // affichage fixé à 4 chiffres
 	// ----
+	
 	double i_by=20.;
 
 	t_NR[0]=clock();

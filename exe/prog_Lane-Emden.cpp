@@ -12,7 +12,7 @@ using namespace std;
 
 
 // Variables relatives aux calculs
-double			n=1.; // valeur de l'indice polytropique
+double			n=6.; // valeur de l'indice polytropique
 
 const int 		N=2000; // nombre de noeuds de la grille de calcul
 const float		z_max=40.; // valeur maximale de z
@@ -28,7 +28,7 @@ bool 			error_status=false; // initialisation de la variable d'erreur
 
 
 // Définition des fichiers de sortie
-ofstream resultats("resultats.dat");
+ofstream resultats("resultats_Lane-Emden.dat");
 // ----
 
 
@@ -117,11 +117,11 @@ double calcul_zeros_dichotomie(double a, double b, int i, double tolerance)
 void calcul_w()
 {
 	w[0]=1.; // Condition au centre de w
-	w[1]=1./(1.+(pow(h,2)/6.));
+	w[1]=1.-(pow(h,2)/6.);
 	
 	for (int i = 2 ; i<=N ; i++)
 	{
-		// w[i]=calcul_zeros_dichotomie(w[i-1]-0.01,w[i-1]+0.01,i,critere_convergence);
+		// w[i]=calcul_zeros_dichotomie(w[i-1]-0.03,w[i-1]+0.03,i,critere_convergence);
 		w[i]=calcul_zeros_NR(w[i-1],i,critere_convergence,1e6);
 		
 		if (error_status) // sortir si erreur
