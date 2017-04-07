@@ -130,6 +130,6 @@ int main()
 	for (int i = 1; i <= N; i++) {
 		resultats_comparaison_methodes
 		<< i/i_by << "	" << t_NR[i] << "	" << steps_NR[i] << "	"
-		<< t_dichotomie[i] << "	" << steps_dichotomie <<endl;
+		<< t_dichotomie[i] << "	" << steps_dichotomie[i] <<endl;
 	}
 }
