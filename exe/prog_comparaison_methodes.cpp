@@ -115,7 +115,7 @@ int main()
 	t_NR[0]=clock();
 	steps_NR[0]=0;
 	for (int i = 1; i <= N; i++) {
-		NR=calcul_zeros_NR(i/i_by,i,1e-6);
+		NR=calcul_zeros_NR(1.+i/i_by,i,1e-6);
 		t_NR[i]=clock()-t_NR[i-1];
 	}
 
